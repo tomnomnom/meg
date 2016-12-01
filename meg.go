@@ -2,23 +2,47 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/tls"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
+	"path"
 	"strings"
 	"time"
 )
 
 type result struct {
 	url     string
-	code    int
+	status  string
 	headers http.Header
+	body    []byte
 }
 
-type results []result
+func (r result) String() string {
+	buf := &bytes.Buffer{}
+
+	buf.WriteString(r.url)
+	buf.WriteString("\n\n")
+	buf.WriteString(r.status)
+	buf.WriteString("\n")
+
+	for name, values := range r.headers {
+		buf.WriteString(
+			fmt.Sprintf("%s: %s\n", name, strings.Join(values, ", ")),
+		)
+	}
+
+	buf.WriteString("\n\n")
+	buf.Write(r.body)
+	buf.WriteString("\n")
+
+	return buf.String()
+}
 
 func (r result) printHeaders() {
 	if r.headers == nil {
@@ -28,6 +52,8 @@ func (r result) printHeaders() {
 		fmt.Printf("%s: %s\n", name, strings.Join(values, ", "))
 	}
 }
+
+type results []result
 
 func req(url string, rc chan result) {
 	tr := &http.Transport{
@@ -44,15 +70,44 @@ func req(url string, rc chan result) {
 	}
 	resp, err := client.Get(url)
 	if err != nil {
-		rc <- result{url, -1, nil}
+		rc <- result{url, "", nil, nil}
 		return
 	}
-	rc <- result{url, resp.StatusCode, resp.Header}
+	body, _ := ioutil.ReadAll(resp.Body)
+	rc <- result{url, resp.Status, resp.Header, body}
 }
 
 func reqMulti(urls []string, rc chan result) {
 	for _, url := range urls {
 		go req(url, rc)
+	}
+}
+
+func writeFile(r result) {
+
+	u, err := url.Parse(r.url)
+	if err != nil {
+		log.Printf("failed to parse url [%s]", r.url)
+		return
+	}
+
+	parts := []string{"./out"}
+	parts = append(parts, u.Scheme)
+	parts = append(parts, u.Host)
+	parts = append(parts, u.Path)
+
+	p := path.Join(parts...)
+
+	err = os.MkdirAll(path.Dir(p), 0750)
+	if err != nil {
+		log.Printf("failed to create dir for [%s]", p)
+		return
+	}
+
+	err = ioutil.WriteFile(p, []byte(r.String()), 0640)
+	if err != nil {
+		log.Printf("failed to write [%s]", p)
+		return
 	}
 }
 
@@ -72,7 +127,7 @@ func main() {
 	urls := make([]string, 0)
 	sc := bufio.NewScanner(f)
 	for sc.Scan() {
-		urls = append(urls, sc.Text()+path)
+		urls = append(urls, strings.ToLower(sc.Text())+path)
 	}
 	if err = sc.Err(); err != nil {
 		log.Fatal(err)
@@ -83,9 +138,9 @@ func main() {
 
 	for i := 0; i < len(urls); i++ {
 		r := <-rc
-		fmt.Printf("%d %s\n", r.code, r.url)
-		//r.printHeaders()
-		//fmt.Println("")
+		fmt.Printf("%s %s\n", r.status, r.url)
+
+		writeFile(r)
 	}
 
 }
