@@ -98,10 +98,12 @@ func writeFile(r result) {
 
 	p := path.Join(parts...)
 
-	err = os.MkdirAll(path.Dir(p), 0750)
-	if err != nil {
-		log.Printf("failed to create dir for [%s]", p)
-		return
+	if _, err := os.Stat(path.Dir(p)); os.IsNotExist(err) {
+		err = os.MkdirAll(path.Dir(p), 0750)
+		if err != nil {
+			log.Printf("failed to create dir for [%s]", p)
+			return
+		}
 	}
 
 	err = ioutil.WriteFile(p, []byte(r.String()), 0640)
