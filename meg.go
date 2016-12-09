@@ -131,13 +131,13 @@ func writeFile(r result) {
 
 func main() {
 
+	saveFlag := false
+	flag.BoolVar(&saveFlag, "save", false, "")
+
 	flag.Parse()
 
 	prefixes := flag.Arg(0)
 	path := flag.Arg(1)
-
-	saveFlag := false
-	flag.BoolVar(&saveFlag, "save", false, "")
 
 	f, err := os.Open(prefixes)
 	if err != nil {
