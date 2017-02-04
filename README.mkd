@@ -1,0 +1,5 @@
+# meg
+
+meg is a toy tool I'm hacking on for requesting many URLs in parallel.
+
+meg is not yet fit for human consumption.

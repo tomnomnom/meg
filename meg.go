@@ -78,10 +78,26 @@ func req(url string, rc chan result) {
 	rc <- result{url, resp.Status, resp.Header, body}
 }
 
-func reqMulti(urls []string, rc chan result) {
-	for _, url := range urls {
-		go req(url, rc)
+func reqWorker(urls chan string, rc chan result) {
+	for {
+		url, ok := <-urls
+		if !ok {
+			return
+		}
+		req(url, rc)
 	}
+}
+
+// spin up a bunch of workers and then feed the requesrs in
+func reqMulti(urls []string, rc chan result) {
+	reqs := make(chan string)
+	for i := 0; i < 40; i++ {
+		go reqWorker(reqs, rc)
+	}
+	for _, url := range urls {
+		reqs <- url
+	}
+	close(reqs)
 }
 
 func writeFile(r result) {
@@ -116,6 +132,9 @@ func writeFile(r result) {
 
 func main() {
 
+	saveFlag := false
+	flag.BoolVar(&saveFlag, "save", false, "")
+
 	flag.Parse()
 
 	prefixes := flag.Arg(0)
@@ -137,13 +156,15 @@ func main() {
 	}
 
 	rc := make(chan result)
-	reqMulti(urls, rc)
+	go reqMulti(urls, rc)
 
 	for i := 0; i < len(urls); i++ {
 		r := <-rc
 		fmt.Printf("%s %s\n", r.status, r.url)
 
-		writeFile(r)
+		if saveFlag {
+			writeFile(r)
+		}
 	}
 
 }
