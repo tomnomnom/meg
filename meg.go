@@ -86,21 +86,21 @@ func req(url string, method string, rc chan result) {
 	rc <- result{url, resp.Status, resp.Header, body}
 }
 
-func reqWorker(urls chan string, rc chan result) {
+func reqWorker(urls chan string, method string, rc chan result) {
 	for {
 		url, ok := <-urls
 		if !ok {
 			return
 		}
-		req(url, "GET", rc)
+		req(url, method, rc)
 	}
 }
 
 // spin up a bunch of workers and then feed the requesrs in
-func reqMulti(urls []string, rc chan result) {
+func reqMulti(urls []string, method string, rc chan result) {
 	reqs := make(chan string)
 	for i := 0; i < 40; i++ {
-		go reqWorker(reqs, rc)
+		go reqWorker(reqs, method, rc)
 	}
 	for _, url := range urls {
 		reqs <- url
@@ -141,7 +141,9 @@ func writeFile(r result) {
 func main() {
 
 	saveFlag := false
-	flag.BoolVar(&saveFlag, "save", false, "")
+	httpMethod := "GET"
+	flag.BoolVar(&saveFlag, "save", false, "save the responses")
+	flag.StringVar(&httpMethod, "method", "GET", "HTTP method to use")
 
 	flag.Parse()
 
@@ -164,7 +166,7 @@ func main() {
 	}
 
 	rc := make(chan result)
-	go reqMulti(urls, rc)
+	go reqMulti(urls, httpMethod, rc)
 
 	for i := 0; i < len(urls); i++ {
 		r := <-rc
