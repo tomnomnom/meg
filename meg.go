@@ -56,10 +56,11 @@ func (r result) printHeaders() {
 
 type results []result
 
-func req(url string, rc chan result) {
+func req(url string, method string, rc chan result) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
+	// We don't want to follow redirects
 	re := func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}
@@ -69,7 +70,14 @@ func req(url string, rc chan result) {
 		CheckRedirect: re,
 		Timeout:       time.Second * 10,
 	}
-	resp, err := client.Get(url)
+
+	req, err := http.NewRequest(method, url, nil)
+	if err != nil {
+		rc <- result{url, "", nil, nil}
+		return
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		rc <- result{url, "", nil, nil}
 		return
@@ -84,7 +92,7 @@ func reqWorker(urls chan string, rc chan result) {
 		if !ok {
 			return
 		}
-		req(url, rc)
+		req(url, "GET", rc)
 	}
 }
 
