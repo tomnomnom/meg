@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"crypto/sha1"
 	"crypto/tls"
 	"flag"
 	"fmt"
@@ -91,10 +92,10 @@ func writeFile(r result) {
 		return
 	}
 
+	checksum := sha1.Sum([]byte(r.url))
 	parts := []string{"./out"}
-	parts = append(parts, u.Scheme)
 	parts = append(parts, u.Host)
-	parts = append(parts, u.Path)
+	parts = append(parts, fmt.Sprintf("%x", checksum))
 
 	p := path.Join(parts...)
 
