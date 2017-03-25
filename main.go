@@ -107,12 +107,12 @@ func main() {
 
 	// wait for results
 	for r := range results {
-		err := recordJob(r, savePath)
+		fn, err := recordJob(r, savePath)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		fmt.Printf("%s: %s\n", r.resp.status, r.url.String())
+		fmt.Printf("%s %s (%s)\n", fn, r.url.String(), r.resp.status)
 	}
 
 }

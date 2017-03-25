@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func recordJob(j job, pathPrefix string) error {
+func recordJob(j job, pathPrefix string) (string, error) {
 
 	checksum := sha1.Sum([]byte(j.url.String()))
 	parts := []string{pathPrefix}
@@ -22,16 +22,16 @@ func recordJob(j job, pathPrefix string) error {
 	if _, err := os.Stat(path.Dir(p)); os.IsNotExist(err) {
 		err = os.MkdirAll(path.Dir(p), 0750)
 		if err != nil {
-			return err
+			return p, err
 		}
 	}
 
 	err := ioutil.WriteFile(p, []byte(j.String()), 0640)
 	if err != nil {
-		return err
+		return p, err
 	}
 
-	return nil
+	return p, nil
 }
 
 func (j job) String() string {
