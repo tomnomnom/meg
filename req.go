@@ -27,12 +27,15 @@ func httpRequest(method, url string) (response, error) {
 	if err != nil {
 		return response{}, err
 	}
+	req.Close = true
 
 	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return response{}, err
 	}
-	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 	return response{resp.Status, resp.Header, body}, nil
 }

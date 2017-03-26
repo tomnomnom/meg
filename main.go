@@ -37,12 +37,12 @@ func main() {
 
 	concurrency := 20
 	method := "GET"
-	sleep := 1
+	sleep := 30
 	savePath := "./out"
 
 	flag.StringVar(&method, "method", "GET", "HTTP method to use")
 	flag.StringVar(&savePath, "savepath", "./out", "where to save the output")
-	flag.IntVar(&sleep, "sleep", 1, "sleep duration between each suffix")
+	flag.IntVar(&sleep, "sleep", 30, "sleep duration between each suffix")
 	flag.IntVar(&concurrency, "concurrency", 20, "concurrency")
 
 	flag.Parse()
