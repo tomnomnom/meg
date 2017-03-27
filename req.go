@@ -7,21 +7,21 @@ import (
 	"time"
 )
 
+var transport = &http.Transport{
+	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+}
+
+var checkRedirect = func(req *http.Request, via []*http.Request) error {
+	return http.ErrUseLastResponse
+}
+
+var httpClient = &http.Client{
+	Transport:     transport,
+	CheckRedirect: checkRedirect,
+	Timeout:       time.Second * 10,
+}
+
 func httpRequest(method, url string) (response, error) {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-
-	// We don't want to follow redirects
-	re := func(req *http.Request, via []*http.Request) error {
-		return http.ErrUseLastResponse
-	}
-
-	client := &http.Client{
-		Transport:     tr,
-		CheckRedirect: re,
-		Timeout:       time.Second * 10,
-	}
 
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
@@ -29,7 +29,7 @@ func httpRequest(method, url string) (response, error) {
 	}
 	req.Close = true
 
-	resp, err := client.Do(req)
+	resp, err := httpClient.Do(req)
 	if resp != nil {
 		defer resp.Body.Close()
 	}
