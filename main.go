@@ -4,14 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
-	"net/url"
 	"sync"
 	"time"
 )
 
 type job struct {
 	// request data
-	url    *url.URL
+	prefix string
+	suffix string
 	method string
 
 	resp response
@@ -26,7 +26,7 @@ type response struct {
 
 func worker(jobs <-chan job, results chan<- job) {
 	for j := range jobs {
-		r, err := httpRequest(j.method, j.url.String())
+		r, err := httpRequest(j.method, j.prefix, j.suffix)
 		j.resp = r
 		j.err = err
 		results <- j
@@ -94,11 +94,7 @@ func main() {
 	go func() {
 		for _, suffix := range suffixes {
 			for _, prefix := range prefixes {
-				u, err := url.Parse(prefix + suffix)
-				if err != nil {
-					continue
-				}
-				jobs <- job{url: u, method: method}
+				jobs <- job{prefix: prefix, suffix: suffix, method: method}
 			}
 			time.Sleep(time.Second * time.Duration(sleep))
 		}
@@ -112,7 +108,7 @@ func main() {
 			fmt.Println(err)
 			continue
 		}
-		fmt.Printf("%s %s (%s)\n", fn, r.url.String(), r.resp.status)
+		fmt.Printf("%s %s%s (%s)\n", fn, r.prefix, r.suffix, r.resp.status)
 	}
 
 }

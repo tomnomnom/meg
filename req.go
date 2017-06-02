@@ -21,13 +21,18 @@ var httpClient = &http.Client{
 	Timeout:       time.Second * 10,
 }
 
-func httpRequest(method, url string) (response, error) {
+func httpRequest(method, prefix, suffix string) (response, error) {
 
-	req, err := http.NewRequest(method, url, nil)
+	req, err := http.NewRequest(method, prefix, nil)
 	if err != nil {
 		return response{}, err
 	}
 	req.Close = true
+
+	// Because we sometimes want to send some fairly dodgy paths,
+	// like /%%0a0afoo for example, we need to set the path on
+	// req.URL's Opaque field where it won't be parsed or encoded
+	req.URL.Opaque = suffix
 
 	resp, err := httpClient.Do(req)
 	if resp != nil {

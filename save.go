@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path"
 	"strings"
@@ -12,9 +13,18 @@ import (
 
 func recordJob(j job, pathPrefix string) (string, error) {
 
-	checksum := sha1.Sum([]byte(j.url.String()))
+	checksum := sha1.Sum([]byte(j.prefix + j.suffix))
 	parts := []string{pathPrefix}
-	parts = append(parts, j.url.Host)
+
+	// we need the host as part of the path. The suffix might
+	// fail to parse, but the prefix shouldn't so we should
+	// be ok to call url.Parse here
+	u, err := url.Parse(j.prefix)
+	if err != nil {
+		return "", err
+	}
+
+	parts = append(parts, u.Host)
 	parts = append(parts, fmt.Sprintf("%x", checksum))
 
 	p := path.Join(parts...)
@@ -26,7 +36,7 @@ func recordJob(j job, pathPrefix string) (string, error) {
 		}
 	}
 
-	err := ioutil.WriteFile(p, []byte(j.String()), 0640)
+	err = ioutil.WriteFile(p, []byte(j.String()), 0640)
 	if err != nil {
 		return p, err
 	}
@@ -37,7 +47,7 @@ func recordJob(j job, pathPrefix string) (string, error) {
 func (j job) String() string {
 	buf := &bytes.Buffer{}
 
-	buf.WriteString(j.url.String())
+	buf.WriteString(j.prefix + j.suffix)
 	buf.WriteString("\n\n")
 	buf.WriteString(j.resp.status)
 	buf.WriteString("\n")
