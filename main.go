@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 )
@@ -39,6 +40,11 @@ func main() {
 	method := "GET"
 	sleep := 30
 	savePath := "./out"
+
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: meg [flags] <prefixes> <suffixes>\n")
+		flag.PrintDefaults()
+	}
 
 	flag.StringVar(&method, "method", "GET", "HTTP method to use")
 	flag.StringVar(&savePath, "savepath", "./out", "where to save the output")
