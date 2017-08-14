@@ -1,0 +1,12 @@
+/http://example.com
+/%5cexample.com
+/%2f%2fexample.com
+/http:/example.com
+/?url=http://example.com&next=http://example.com&redirect=http://example.com
+/?url=//example.com&next=//example.com&redirect=//example.com
+/?url=/\/example.com&next=/\/example.com&redirect=/\/example.com
+/redirect?url=http://example.com&next=http://example.com&redirect=http://example.com
+/redirect?url=//example.com&next=//example.com&redirect=//example.com
+/redirect?url=/\/example.com&next=/\/example.com&redirect=/\/example.com
+/.example.com
+///\;@example.com

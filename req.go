@@ -23,7 +23,7 @@ var httpClient = &http.Client{
 
 func httpRequest(method, prefix, suffix string) (response, error) {
 
-	req, err := http.NewRequest(method, prefix, nil)
+	req, err := http.NewRequest(method, prefix+suffix, nil)
 	if err != nil {
 		return response{}, err
 	}
@@ -32,7 +32,7 @@ func httpRequest(method, prefix, suffix string) (response, error) {
 	// Because we sometimes want to send some fairly dodgy paths,
 	// like /%%0a0afoo for example, we need to set the path on
 	// req.URL's Opaque field where it won't be parsed or encoded
-	req.URL.Opaque = suffix
+	//req.URL.Opaque = suffix
 
 	// It feels super nasty doing this, but some sites act differently
 	// when they don't recognise the user agent. E.g. some will just
