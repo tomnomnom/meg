@@ -11,9 +11,10 @@ import (
 
 type job struct {
 	// request data
-	prefix string
-	suffix string
-	method string
+	prefix  string
+	suffix  string
+	method  string
+	headers reqHeaders
 
 	resp response
 	err  error
@@ -27,11 +28,22 @@ type response struct {
 
 func worker(jobs <-chan job, results chan<- job) {
 	for j := range jobs {
-		r, err := httpRequest(j.method, j.prefix, j.suffix)
+		r, err := httpRequest(j)
 		j.resp = r
 		j.err = err
 		results <- j
 	}
+}
+
+type reqHeaders []string
+
+func (h *reqHeaders) Set(val string) error {
+	*h = append(*h, val)
+	return nil
+}
+
+func (h reqHeaders) String() string {
+	return "string"
 }
 
 func main() {
@@ -40,28 +52,25 @@ func main() {
 	method := "GET"
 	sleep := 30
 	savePath := "./out"
+	prefixPath := "prefixes"
+	suffixPath := "suffixes"
+
+	var headers reqHeaders
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: meg [flags] <prefixes> <suffixes>\n")
+		fmt.Fprintf(os.Stderr, "Usage: meg [flags]\n")
 		flag.PrintDefaults()
 	}
 
 	flag.StringVar(&method, "method", "GET", "HTTP method to use")
 	flag.StringVar(&savePath, "savepath", "./out", "where to save the output")
+	flag.StringVar(&prefixPath, "prefixes", "prefixes", "file containing prefixes")
+	flag.StringVar(&suffixPath, "suffixes", "suffixes", "file containing suffixes")
 	flag.IntVar(&sleep, "sleep", 30, "sleep duration between each suffix")
 	flag.IntVar(&concurrency, "concurrency", 20, "concurrency")
+	flag.Var(&headers, "header", "header to add to the request")
 
 	flag.Parse()
-
-	prefixPath := flag.Arg(0)
-	if prefixPath == "" {
-		prefixPath = "prefixes"
-	}
-
-	suffixPath := flag.Arg(1)
-	if suffixPath == "" {
-		suffixPath = "suffixes"
-	}
 
 	prefixes, err := readLines(prefixPath)
 	if err != nil {
@@ -100,7 +109,7 @@ func main() {
 	go func() {
 		for _, suffix := range suffixes {
 			for _, prefix := range prefixes {
-				jobs <- job{prefix: prefix, suffix: suffix, method: method}
+				jobs <- job{prefix: prefix, suffix: suffix, method: method, headers: headers}
 			}
 			time.Sleep(time.Second * time.Duration(sleep))
 		}

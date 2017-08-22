@@ -47,17 +47,28 @@ func recordJob(j job, pathPrefix string) (string, error) {
 func (j job) String() string {
 	buf := &bytes.Buffer{}
 
+	// Request URL
 	buf.WriteString(j.prefix + j.suffix)
 	buf.WriteString("\n\n")
+
+	// Request Headers
+	for _, header := range j.headers {
+		buf.WriteString(fmt.Sprintf("%s\n", header))
+	}
+	buf.WriteString("\n\n")
+
+	// Response Status
 	buf.WriteString(j.resp.status)
 	buf.WriteString("\n")
 
+	// Response Headers
 	for name, values := range j.resp.headers {
 		buf.WriteString(
 			fmt.Sprintf("%s: %s\n", name, strings.Join(values, ", ")),
 		)
 	}
 
+	// Response Body
 	buf.WriteString("\n\n")
 	buf.Write(j.resp.body)
 	buf.WriteString("\n")

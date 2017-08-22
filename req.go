@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -21,9 +22,9 @@ var httpClient = &http.Client{
 	Timeout:       time.Second * 10,
 }
 
-func httpRequest(method, prefix, suffix string) (response, error) {
+func httpRequest(j job) (response, error) {
 
-	req, err := http.NewRequest(method, prefix+suffix, nil)
+	req, err := http.NewRequest(j.method, j.prefix+j.suffix, nil)
 	if err != nil {
 		return response{}, err
 	}
@@ -39,7 +40,12 @@ func httpRequest(method, prefix, suffix string) (response, error) {
 	// 302 any request to a 'browser not found' page, which makes the
 	// tool kind of useless. It's not about being 'stealthy', it's
 	// about making things work as expected.
-	req.Header.Set("User-Agent", "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
+
+	for _, header := range j.headers {
+		p := strings.SplitN(header, ":", 2)
+		req.Header.Set(p[0], p[1])
+	}
 
 	resp, err := httpClient.Do(req)
 	if resp != nil {
