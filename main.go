@@ -146,7 +146,11 @@ func main() {
 			fmt.Println(err)
 			continue
 		}
-		fmt.Printf("%s %s (%s)\n", filename, r.req.URL.String(), r.resp.Status)
+		status := "[error]"
+		if r.resp != nil {
+			status = r.resp.Status
+		}
+		fmt.Printf("%s %s (%s)\n", filename, r.req.URL.String(), status)
 	}
 
 }
