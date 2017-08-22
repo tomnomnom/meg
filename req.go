@@ -2,9 +2,7 @@ package main
 
 import (
 	"crypto/tls"
-	"io/ioutil"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -22,38 +20,11 @@ var httpClient = &http.Client{
 	Timeout:       time.Second * 10,
 }
 
-func httpRequest(j job) (response, error) {
+func httpRequest(j job) job {
+	resp, err := httpClient.Do(j.req)
 
-	req, err := http.NewRequest(j.method, j.prefix+j.suffix, nil)
-	if err != nil {
-		return response{}, err
-	}
-	req.Close = true
+	j.resp = resp
+	j.err = err
 
-	// Because we sometimes want to send some fairly dodgy paths,
-	// like /%%0a0afoo for example, we need to set the path on
-	// req.URL's Opaque field where it won't be parsed or encoded
-	//req.URL.Opaque = suffix
-
-	// It feels super nasty doing this, but some sites act differently
-	// when they don't recognise the user agent. E.g. some will just
-	// 302 any request to a 'browser not found' page, which makes the
-	// tool kind of useless. It's not about being 'stealthy', it's
-	// about making things work as expected.
-	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
-
-	for _, header := range j.headers {
-		p := strings.SplitN(header, ":", 2)
-		req.Header.Set(p[0], p[1])
-	}
-
-	resp, err := httpClient.Do(req)
-	if resp != nil {
-		defer resp.Body.Close()
-	}
-	if err != nil {
-		return response{}, err
-	}
-	body, _ := ioutil.ReadAll(resp.Body)
-	return response{resp.Status, resp.Header, body}, nil
+	return j
 }
