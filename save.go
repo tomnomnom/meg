@@ -7,17 +7,16 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"strings"
 )
 
 func recordJob(j job, pathPrefix string) (string, error) {
 
 	// TODO: Improve the entropy of the save path to include method, headers etc
 	// ...maybe add the current time too just for the hell of it
-	checksum := sha1.Sum([]byte(j.req.URL.String()))
+	checksum := sha1.Sum([]byte(j.req.URL()))
 	parts := []string{pathPrefix}
 
-	parts = append(parts, j.req.URL.Host)
+	parts = append(parts, j.req.Hostname)
 	parts = append(parts, fmt.Sprintf("%x", checksum))
 
 	p := path.Join(parts...)
@@ -41,36 +40,38 @@ func (j job) String() string {
 	buf := &bytes.Buffer{}
 
 	// Request URL
-	buf.WriteString(j.req.URL.String())
+	buf.WriteString(j.req.URL())
 	buf.WriteString("\n\n")
 
+	buf.WriteString(
+		fmt.Sprintf("> %s\n", j.req.RequestLine()),
+	)
+
 	// Request Headers
-	for name, values := range j.req.Header {
+	for _, h := range j.req.Headers {
 		buf.WriteString(
-			fmt.Sprintf("> %s: %s\n", name, strings.Join(values, ", ")),
+			fmt.Sprintf("> %s\n", h),
 		)
 	}
 	buf.WriteString("\n")
 
 	if j.resp != nil {
-		defer j.resp.Body.Close()
 
 		// Response Status
 		buf.WriteString("< ")
-		buf.WriteString(j.resp.Status)
+		buf.WriteString(j.resp.StatusLine())
 		buf.WriteString("\n")
 
 		// Response Headers
-		for name, values := range j.resp.Header {
+		for _, h := range j.resp.Headers() {
 			buf.WriteString(
-				fmt.Sprintf("< %s: %s\n", name, strings.Join(values, ", ")),
+				fmt.Sprintf("< %s\n", h),
 			)
 		}
 
 		// Response Body
-		body, _ := ioutil.ReadAll(j.resp.Body)
 		buf.WriteString("\n\n")
-		buf.Write(body)
+		buf.Write(j.resp.Body())
 		buf.WriteString("\n")
 	}
 

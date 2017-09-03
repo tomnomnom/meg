@@ -3,26 +3,31 @@ package main
 import (
 	"flag"
 	"fmt"
-	"net/http"
 	"os"
-	"strings"
 	"sync"
 	"time"
+
+	"github.com/tomnomnom/rawhttp"
 )
 
 // job is a wrapper around an HTTP request,
 // the response for that request and any
 // associated error.
 type job struct {
-	req  *http.Request
-	resp *http.Response
+	req  *rawhttp.Request
+	resp *rawhttp.Response
 
 	err error
 }
 
 func worker(jobs <-chan job, results chan<- job) {
 	for j := range jobs {
-		results <- httpRequest(j)
+		resp, err := rawhttp.Do(j.req)
+
+		j.resp = resp
+		j.err = err
+
+		results <- j
 	}
 }
 
@@ -102,28 +107,20 @@ func main() {
 			for _, prefix := range prefixes {
 
 				// Make a new request
-				req, err := http.NewRequest(method, prefix+suffix, nil)
+				req, err := rawhttp.FromURL(method, prefix)
 				if err != nil {
 					continue
 				}
-				req.Close = true
+				req.Path = suffix
 
-				// Because we sometimes want to send some fairly dodgy paths,
-				// like /%%0a0afoo for example, we need to set the path on
-				// req.URL's Opaque field where it won't be parsed or encoded
-				//req.URL.Opaque = suffix
-
-				// It feels super nasty doing this, but some sites act differently
-				// when they don't recognise the user agent. E.g. some will just
-				// 302 any request to a 'browser not found' page, which makes the
-				// tool kind of useless. It's not about being 'stealthy', it's
-				// about making things work as expected.
-				req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
+				req.AddHeader("Connection: close")
 
 				// Set any user provided headers
 				for _, header := range headers {
-					p := strings.SplitN(header, ":", 2)
-					req.Header.Set(strings.TrimSpace(p[0]), strings.TrimSpace(p[1]))
+					req.AddHeader(header)
+				}
+				if req.Header("Host") == "" {
+					req.AutoSetHost()
 				}
 
 				// Feed the job into the requests channel so it can be picked up
@@ -148,9 +145,9 @@ func main() {
 		}
 		status := "[error]"
 		if r.resp != nil {
-			status = r.resp.Status
+			status = r.resp.StatusLine()
 		}
-		fmt.Printf("%s %s (%s)\n", filename, r.req.URL.String(), status)
+		fmt.Printf("%s %s (%s)\n", filename, r.req.URL(), status)
 	}
 
 }
