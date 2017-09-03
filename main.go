@@ -74,10 +74,15 @@ func main() {
 		return
 	}
 
-	suffixes, err := readLines(suffixPath)
-	if err != nil {
-		fmt.Println(err)
-		return
+	path := flag.Arg(0)
+	suffixes := []string{path}
+
+	if path == "" {
+		suffixes, err = readLines(suffixPath)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 
 	jobs := make(chan job)
