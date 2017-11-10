@@ -50,6 +50,7 @@ func main() {
 	savePath := "./out"
 	prefixPath := "prefixes"
 	suffixPath := "suffixes"
+	saveOnly := ""
 
 	var headers reqHeaders
 
@@ -62,6 +63,7 @@ func main() {
 	flag.StringVar(&savePath, "savepath", "./out", "where to save the output")
 	flag.StringVar(&prefixPath, "prefixes", "prefixes", "file containing prefixes")
 	flag.StringVar(&suffixPath, "suffixes", "suffixes", "file containing suffixes")
+	flag.StringVar(&saveOnly, "saveonly", "", "save only responses with this response code")
 	flag.IntVar(&sleep, "sleep", 0, "sleep duration between each suffix")
 	flag.IntVar(&concurrency, "concurrency", 20, "concurrency")
 	flag.Var(&headers, "header", "header to add to the request")
@@ -143,16 +145,22 @@ func main() {
 
 	// wait for results
 	for r := range results {
+
+		if r.resp == nil {
+			fmt.Printf("failed to fetch: %s\n", r.req.URL())
+			continue
+		}
+
+		if saveOnly != "" && r.resp.StatusCode() != saveOnly {
+			continue
+		}
+
 		filename, err := recordJob(r, savePath)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		status := "[error]"
-		if r.resp != nil {
-			status = r.resp.StatusLine()
-		}
-		fmt.Printf("%s %s (%s)\n", filename, r.req.URL(), status)
+		fmt.Printf("%s %s (%s)\n", filename, r.req.URL(), r.resp.StatusLine())
 	}
 
 }
