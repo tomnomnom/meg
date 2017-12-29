@@ -31,6 +31,10 @@ type response struct {
 type requester func(request) response
 
 func main() {
+	method := "GET"
+	flag.StringVar(&method, "method", "GET", "")
+	flag.StringVar(&method, "X", "GET", "")
+
 	flag.Parse()
 
 	// suffixes might be in a file, or it might be a single value
@@ -107,7 +111,7 @@ func main() {
 				fmt.Printf("failed to parse url: %s\n", err)
 				continue
 			}
-			requests <- request{method: "GET", url: u}
+			requests <- request{method: method, url: u}
 		}
 	}
 
@@ -130,6 +134,9 @@ func init() {
 
 		h += "Usage:\n"
 		h += "  meg [suffix|suffixFile] [prefixFile] [outputDir]\n\n"
+
+		h += "Options:\n"
+		h += "  -X, --method  HTTP Method (default: GET)\n"
 
 		h += "Defaults:\n"
 		h += "  suffixFile: ./suffixes\n"
