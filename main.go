@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"sync"
 )
@@ -12,7 +13,7 @@ import (
 // a request is a wrapper for a URL that we want to request
 type request struct {
 	method  string
-	url     string
+	url     *url.URL
 	headers []string
 }
 
@@ -101,7 +102,12 @@ func main() {
 	// send requests for each suffix for every prefix
 	for _, suffix := range suffixes {
 		for _, prefix := range prefixes {
-			requests <- request{method: "GET", url: prefix + suffix}
+			u, err := url.Parse(prefix + suffix)
+			if err != nil {
+				fmt.Printf("failed to parse url: %s\n", err)
+				continue
+			}
+			requests <- request{method: "GET", url: u}
 		}
 	}
 

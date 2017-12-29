@@ -24,7 +24,7 @@ var httpClient = &http.Client{
 
 func doRequest(r request) response {
 
-	req, err := http.NewRequest(r.method, r.url, nil)
+	req, err := http.NewRequest(r.method, r.url.String(), nil)
 	if err != nil {
 		return response{request: r, err: err}
 	}
