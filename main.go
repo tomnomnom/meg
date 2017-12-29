@@ -4,9 +4,9 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"log"
 	"net/url"
 	"os"
+	"path/filepath"
 	"sync"
 )
 
@@ -61,9 +61,14 @@ func main() {
 	flag.StringVar(&method, "X", "GET", "")
 
 	// savestatus param
-	var saveStatus = 0
+	saveStatus := 0
 	flag.IntVar(&saveStatus, "savestatus", 0, "")
 	flag.IntVar(&saveStatus, "s", 0, "")
+
+	// verbose param
+	verbose := false
+	flag.BoolVar(&verbose, "verbose", false, "")
+	flag.BoolVar(&verbose, "v", false, "")
 
 	flag.Parse()
 
@@ -76,7 +81,8 @@ func main() {
 	if f, err := os.Stat(suffixArg); err == nil && f.Mode().IsRegular() {
 		lines, err := readLines(suffixArg)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Fprintf(os.Stderr, "failed to open suffix file: %s\n", err)
+			os.Exit(1)
 		}
 		suffixes = lines
 	} else if suffixArg != "suffixes" {
@@ -91,13 +97,22 @@ func main() {
 	}
 	prefixes, err := readLines(prefixFile)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintf(os.Stderr, "failed to open prefix file: %s\n", err)
+		os.Exit(1)
 	}
 
 	// default the output directory to ./out
 	outputDir := flag.Arg(2)
 	if outputDir == "" {
 		outputDir = "./out"
+	}
+
+	// open the index file
+	indexFile := filepath.Join(outputDir, "index")
+	index, err := os.OpenFile(indexFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to open index file for writing: %s\n", err)
+		os.Exit(1)
 	}
 
 	// the request and response channels for
@@ -130,9 +145,14 @@ func main() {
 
 			path, err := res.save(outputDir)
 			if err != nil {
-				fmt.Printf("failed to save file: %s\n", err)
+				fmt.Fprintf(os.Stderr, "failed to save file: %s\n", err)
 			}
-			fmt.Printf("%s %s (%s)\n", path, res.request.url, res.status)
+
+			line := fmt.Sprintf("%s %s (%s)\n", path, res.request.url, res.status)
+			fmt.Fprintf(index, "%s", line)
+			if verbose {
+				fmt.Printf("%s", line)
+			}
 		}
 		owg.Done()
 	}()
@@ -173,6 +193,7 @@ func init() {
 		h += "  -c, --concurrency <val>    Set the concurrency level (defaut: 20)\n"
 		h += "  -H, --header <header>      Send a custom HTTP header\n"
 		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
+		h += "  -v, --verbose              Verbose mode\n"
 		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
 
 		h += "Defaults:\n"
