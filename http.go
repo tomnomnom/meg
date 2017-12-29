@@ -31,12 +31,15 @@ func doRequest(r request) response {
 	}
 	req.Close = true
 
+	// add the host header to the request manually so it shows up in the output
+	r.headers = append(r.headers, fmt.Sprintf("Host: %s", r.url.Hostname()))
+
 	// It feels super nasty doing this, but some sites act differently
 	// when they don't recognise the user agent. E.g. some will just
 	// 302 any request to a 'browser not found' page, which makes the
 	// tool kind of useless. It's not about being 'stealthy', it's
 	// about making things work as expected.
-	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
+	r.headers = append(r.headers, "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
 
 	for _, h := range r.headers {
 		parts := strings.SplitN(h, ":", 2)
@@ -56,13 +59,6 @@ func doRequest(r request) response {
 	}
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	// add any headers we added to the request
-	for k, vs := range req.Header {
-		for _, v := range vs {
-			r.headers = append(r.headers, fmt.Sprintf("%s: %s", k, v))
-		}
-	}
-
 	// extract the response headers
 	hs := make([]string, 0)
 	for k, vs := range resp.Header {
@@ -72,9 +68,10 @@ func doRequest(r request) response {
 	}
 
 	return response{
-		request: r,
-		status:  resp.Status,
-		headers: hs,
-		body:    body,
+		request:    r,
+		status:     resp.Status,
+		statusCode: resp.StatusCode,
+		headers:    hs,
+		body:       body,
 	}
 }

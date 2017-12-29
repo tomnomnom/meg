@@ -12,7 +12,15 @@ import (
 func (r response) String() string {
 	b := &bytes.Buffer{}
 
-	b.WriteString(fmt.Sprintf("> %s %s\n", r.request.method, r.request.url))
+	b.WriteString(r.request.url.String())
+	b.WriteString("\n\n")
+
+	qs := ""
+	if len(r.request.url.Query()) > 0 {
+		qs = "?" + r.request.url.Query().Encode()
+	}
+
+	b.WriteString(fmt.Sprintf("> %s %s%s HTTP/1.1\n", r.request.method, r.request.url.EscapedPath(), qs))
 
 	// request headers
 	for _, h := range r.request.headers {

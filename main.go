@@ -21,10 +21,12 @@ type request struct {
 // it contains the request value for context.
 type response struct {
 	request request
-	status  string
-	headers []string
-	body    []byte
-	err     error
+
+	status     string
+	statusCode int
+	headers    []string
+	body       []byte
+	err        error
 }
 
 // a requester is a function that makes HTTP requests
@@ -41,10 +43,6 @@ func (h headerArgs) String() string {
 	return "string"
 }
 
-func (h headerArgs) StringSlice() []string {
-	return []string(h)
-}
-
 func main() {
 
 	// headers param
@@ -56,6 +54,11 @@ func main() {
 	method := "GET"
 	flag.StringVar(&method, "method", "GET", "")
 	flag.StringVar(&method, "X", "GET", "")
+
+	// savestatus param
+	var saveStatus = 0
+	flag.IntVar(&saveStatus, "savestatus", 0, "")
+	flag.IntVar(&saveStatus, "s", 0, "")
 
 	flag.Parse()
 
@@ -116,6 +119,10 @@ func main() {
 	owg.Add(1)
 	go func() {
 		for res := range responses {
+			if saveStatus != 0 && saveStatus != res.statusCode {
+				continue
+			}
+
 			path, err := res.save(outputDir)
 			if err != nil {
 				fmt.Printf("failed to save file: %s\n", err)
@@ -158,8 +165,9 @@ func init() {
 		h += "  meg [suffix|suffixFile] [prefixFile] [outputDir]\n\n"
 
 		h += "Options:\n"
-		h += "  -H, --header  Send a custom HTTP header\n"
-		h += "  -X, --method  HTTP method (default: GET)\n\n"
+		h += "  -H, --header <header>      Send a custom HTTP header\n"
+		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
+		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
 
 		h += "Defaults:\n"
 		h += "  suffixFile: ./suffixes\n"
