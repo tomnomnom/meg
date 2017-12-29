@@ -38,7 +38,7 @@ func main() {
 		suffixArg = "suffixes"
 	}
 	var suffixes []string
-	if _, err := os.Stat(suffixArg); err == nil {
+	if f, err := os.Stat(suffixArg); err == nil && f.Mode().IsRegular() {
 		lines, err := readLines(suffixArg)
 		if err != nil {
 			log.Fatal(err)
@@ -89,8 +89,11 @@ func main() {
 	owg.Add(1)
 	go func() {
 		for res := range responses {
-			fmt.Println(res.request.url)
-			res.save(outputDir)
+			path, err := res.save(outputDir)
+			if err != nil {
+				fmt.Printf("failed to save file: %s\n", err)
+			}
+			fmt.Printf("%s %s\n", path, res.request.url)
 		}
 		owg.Done()
 	}()
