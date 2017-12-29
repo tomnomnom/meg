@@ -1,166 +1,211 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
+	"log"
+	"net/url"
 	"os"
 	"sync"
-	"time"
-
-	"github.com/tomnomnom/rawhttp"
 )
 
-// job is a wrapper around an HTTP request,
-// the response for that request and any
-// associated error.
-type job struct {
-	req  *rawhttp.Request
-	resp *rawhttp.Response
-
-	err error
+// a request is a wrapper for a URL that we want to request
+type request struct {
+	method  string
+	url     *url.URL
+	headers []string
 }
 
-func worker(jobs <-chan job, results chan<- job) {
-	for j := range jobs {
-		resp, err := rawhttp.Do(j.req)
+// a response is a wrapper around an HTTP response;
+// it contains the request value for context.
+type response struct {
+	request request
 
-		j.resp = resp
-		j.err = err
-
-		results <- j
-	}
+	status     string
+	statusCode int
+	headers    []string
+	body       []byte
+	err        error
 }
 
-type reqHeaders []string
+// a requester is a function that makes HTTP requests
+type requester func(request) response
 
-func (h *reqHeaders) Set(val string) error {
+type headerArgs []string
+
+func (h *headerArgs) Set(val string) error {
 	*h = append(*h, val)
 	return nil
 }
 
-func (h reqHeaders) String() string {
+func (h headerArgs) String() string {
 	return "string"
 }
 
 func main() {
 
-	concurrency := 20
+	// headers param
+	var headers headerArgs
+	flag.Var(&headers, "header", "")
+	flag.Var(&headers, "H", "")
+
+	// method param
 	method := "GET"
-	sleep := 0
-	savePath := "./out"
-	prefixPath := "prefixes"
-	suffixPath := "suffixes"
-	saveOnly := ""
+	flag.StringVar(&method, "method", "GET", "")
+	flag.StringVar(&method, "X", "GET", "")
 
-	var headers reqHeaders
-
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: meg [flags]\n")
-		flag.PrintDefaults()
-	}
-
-	flag.StringVar(&method, "method", "GET", "HTTP method to use")
-	flag.StringVar(&savePath, "savepath", "./out", "where to save the output")
-	flag.StringVar(&prefixPath, "prefixes", "prefixes", "file containing prefixes")
-	flag.StringVar(&suffixPath, "suffixes", "suffixes", "file containing suffixes")
-	flag.StringVar(&saveOnly, "saveonly", "", "save only responses with this response code")
-	flag.IntVar(&sleep, "sleep", 0, "sleep duration between each suffix")
-	flag.IntVar(&concurrency, "concurrency", 20, "concurrency")
-	flag.Var(&headers, "header", "header to add to the request")
+	// savestatus param
+	var saveStatus = 0
+	flag.IntVar(&saveStatus, "savestatus", 0, "")
+	flag.IntVar(&saveStatus, "s", 0, "")
 
 	flag.Parse()
 
-	prefixes, err := readLines(prefixPath)
-	if err != nil {
-		fmt.Println(err)
-		return
+	// suffixes might be in a file, or it might be a single value
+	suffixArg := flag.Arg(0)
+	if suffixArg == "" {
+		suffixArg = "suffixes"
 	}
-
-	path := flag.Arg(0)
-	suffixes := []string{path}
-
-	if path == "" {
-		suffixes, err = readLines(suffixPath)
+	var suffixes []string
+	if f, err := os.Stat(suffixArg); err == nil && f.Mode().IsRegular() {
+		lines, err := readLines(suffixArg)
 		if err != nil {
-			fmt.Println(err)
-			return
+			log.Fatal(err)
 		}
+		suffixes = lines
+	} else if suffixArg != "suffixes" {
+		// don't treat the default suffixes filename as a literal value
+		suffixes = []string{suffixArg}
 	}
 
-	jobs := make(chan job)
-	results := make(chan job)
+	// prefixes are always in a file
+	prefixFile := flag.Arg(1)
+	if prefixFile == "" {
+		prefixFile = "prefixes"
+	}
+	prefixes, err := readLines(prefixFile)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// spin up the workers
+	// default the output directory to ./out
+	outputDir := flag.Arg(2)
+	if outputDir == "" {
+		outputDir = "./out"
+	}
+
+	// the request and response channels for
+	// the worker pool
+	requests := make(chan request)
+	responses := make(chan response)
+
+	// spin up some workers to do the requests
 	var wg sync.WaitGroup
-	for i := 0; i < concurrency; i++ {
-
+	for i := 0; i < 10; i++ {
 		wg.Add(1)
+
 		go func() {
-			worker(jobs, results)
+			for req := range requests {
+				responses <- doRequest(req)
+			}
 			wg.Done()
 		}()
 	}
 
-	// close the results channel when all of the
-	// workers have finished
+	// start outputting the response lines; we need a second
+	// WaitGroup so we know the outputting has finished
+	var owg sync.WaitGroup
+	owg.Add(1)
 	go func() {
-		wg.Wait()
-		close(results)
-	}()
-
-	// feed in the jobs
-	go func() {
-		for _, suffix := range suffixes {
-			for _, prefix := range prefixes {
-
-				// Make a new request
-				req, err := rawhttp.FromURL(method, prefix)
-				if err != nil {
-					continue
-				}
-				req.Path = suffix
-
-				req.AddHeader("Connection: close")
-
-				// Set any user provided headers
-				for _, header := range headers {
-					req.AddHeader(header)
-				}
-				if req.Header("Host") == "" {
-					req.AutoSetHost()
-				}
-
-				// Feed the job into the requests channel so it can be picked up
-				// by a worker
-				jobs <- job{req: req}
+		for res := range responses {
+			if saveStatus != 0 && saveStatus != res.statusCode {
+				continue
 			}
 
-			// Sleep for a bit before moving onto the next prefix...
-			// This responsibility needs to be moved into some kind
-			// of controller for the worker pool... Or something.
-			time.Sleep(time.Second * time.Duration(sleep))
+			path, err := res.save(outputDir)
+			if err != nil {
+				fmt.Printf("failed to save file: %s\n", err)
+			}
+			fmt.Printf("%s %s (%s)\n", path, res.request.url, res.status)
 		}
-		close(jobs)
+		owg.Done()
 	}()
 
-	// wait for results
-	for r := range results {
-
-		if r.resp == nil {
-			fmt.Printf("failed to fetch: %s\n", r.req.URL())
-			continue
+	// send requests for each suffix for every prefix
+	for _, suffix := range suffixes {
+		for _, prefix := range prefixes {
+			u, err := url.Parse(prefix + suffix)
+			if err != nil {
+				fmt.Printf("failed to parse url: %s\n", err)
+				continue
+			}
+			requests <- request{method: method, url: u, headers: headers}
 		}
-
-		if saveOnly != "" && r.resp.StatusCode() != saveOnly {
-			continue
-		}
-
-		filename, err := recordJob(r, savePath)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-		fmt.Printf("%s %s (%s)\n", filename, r.req.URL(), r.resp.StatusLine())
 	}
 
+	// once all of the requests have been sent we can
+	// close the requests channel
+	close(requests)
+
+	// wait for all the workers to finish before closing
+	// the responses channel
+	wg.Wait()
+	close(responses)
+
+	owg.Wait()
+
+}
+
+func init() {
+	flag.Usage = func() {
+		h := "Request many paths (suffixes) for many hosts (prefixes)\n\n"
+
+		h += "Usage:\n"
+		h += "  meg [suffix|suffixFile] [prefixFile] [outputDir]\n\n"
+
+		h += "Options:\n"
+		h += "  -H, --header <header>      Send a custom HTTP header\n"
+		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
+		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
+
+		h += "Defaults:\n"
+		h += "  suffixFile: ./suffixes\n"
+		h += "  prefixFile: ./prefixes\n"
+		h += "  outputDir:  ./out\n\n"
+
+		h += "Suffix file format:\n"
+		h += "  /robots.txt\n"
+		h += "  /package.json\n"
+		h += "  /security.txt\n\n"
+
+		h += "Prefix file format:\n"
+		h += "  http://example.com\n"
+		h += "  https://example.edu\n"
+		h += "  https://example.net\n\n"
+
+		h += "Examples:\n"
+		h += "  meg /robots.txt\n"
+		h += "  meg hosts.txt paths.txt output\n"
+
+		fmt.Fprintf(os.Stderr, h)
+	}
+}
+
+// readLines reads all of the lines from a text file in to
+// a slice of strings, returning the slice and any error
+func readLines(filename string) ([]string, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return []string{}, err
+	}
+	defer f.Close()
+
+	lines := make([]string, 0)
+	sc := bufio.NewScanner(f)
+	for sc.Scan() {
+		lines = append(lines, sc.Text())
+	}
+
+	return lines, sc.Err()
 }
