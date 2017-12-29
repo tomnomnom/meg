@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -36,6 +37,15 @@ func doRequest(r request) response {
 	// tool kind of useless. It's not about being 'stealthy', it's
 	// about making things work as expected.
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
+
+	for _, h := range r.headers {
+		parts := strings.SplitN(h, ":", 2)
+		if len(parts) != 2 {
+			continue
+		}
+
+		req.Header.Set(parts[0], parts[1])
+	}
 
 	resp, err := httpClient.Do(req)
 	if resp != nil {

@@ -30,7 +30,29 @@ type response struct {
 // a requester is a function that makes HTTP requests
 type requester func(request) response
 
+type headerArgs []string
+
+func (h *headerArgs) Set(val string) error {
+	*h = append(*h, val)
+	return nil
+}
+
+func (h headerArgs) String() string {
+	return "string"
+}
+
+func (h headerArgs) StringSlice() []string {
+	return []string(h)
+}
+
 func main() {
+
+	// headers param
+	var headers headerArgs
+	flag.Var(&headers, "header", "")
+	flag.Var(&headers, "H", "")
+
+	// method param
 	method := "GET"
 	flag.StringVar(&method, "method", "GET", "")
 	flag.StringVar(&method, "X", "GET", "")
@@ -111,7 +133,7 @@ func main() {
 				fmt.Printf("failed to parse url: %s\n", err)
 				continue
 			}
-			requests <- request{method: method, url: u}
+			requests <- request{method: method, url: u, headers: headers}
 		}
 	}
 
@@ -136,7 +158,8 @@ func init() {
 		h += "  meg [suffix|suffixFile] [prefixFile] [outputDir]\n\n"
 
 		h += "Options:\n"
-		h += "  -X, --method  HTTP Method (default: GET)\n"
+		h += "  -H, --header  Send a custom HTTP header\n"
+		h += "  -X, --method  HTTP method (default: GET)\n\n"
 
 		h += "Defaults:\n"
 		h += "  suffixFile: ./suffixes\n"
