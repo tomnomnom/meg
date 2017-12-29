@@ -45,6 +45,11 @@ func (h headerArgs) String() string {
 
 func main() {
 
+	// concurrency param
+	var concurrency = 20
+	flag.IntVar(&concurrency, "concurrency", 20, "")
+	flag.IntVar(&concurrency, "c", 20, "")
+
 	// headers param
 	var headers headerArgs
 	flag.Var(&headers, "header", "")
@@ -102,7 +107,7 @@ func main() {
 
 	// spin up some workers to do the requests
 	var wg sync.WaitGroup
-	for i := 0; i < 10; i++ {
+	for i := 0; i < concurrency; i++ {
 		wg.Add(1)
 
 		go func() {
@@ -165,6 +170,7 @@ func init() {
 		h += "  meg [suffix|suffixFile] [prefixFile] [outputDir]\n\n"
 
 		h += "Options:\n"
+		h += "  -c, --concurrency <val>    Set the concurrency level (defaut: 20)\n"
 		h += "  -H, --header <header>      Send a custom HTTP header\n"
 		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
 		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
