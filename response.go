@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path"
 )
@@ -37,7 +38,12 @@ func (r response) save(pathPrefix string) (string, error) {
 	checksum := sha1.Sum([]byte(r.request.url))
 	parts := []string{pathPrefix}
 
-	//parts = append(parts, j.req.Hostname)
+	host := "unknownhost"
+	if u, err := url.Parse(r.request.url); err == nil {
+		host = u.Hostname()
+	}
+
+	parts = append(parts, host)
 	parts = append(parts, fmt.Sprintf("%x", checksum))
 
 	p := path.Join(parts...)

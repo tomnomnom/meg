@@ -93,7 +93,7 @@ func main() {
 			if err != nil {
 				fmt.Printf("failed to save file: %s\n", err)
 			}
-			fmt.Printf("%s %s\n", path, res.request.url)
+			fmt.Printf("%s %s (%s)\n", path, res.request.url, res.status)
 		}
 		owg.Done()
 	}()
