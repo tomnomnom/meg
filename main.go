@@ -11,9 +11,9 @@ import (
 
 // a request is a wrapper for a URL that we want to request
 type request struct {
-	//method string
-	url string
-	//headers []string
+	method  string
+	url     string
+	headers []string
 }
 
 // a response is a wrapper around an HTTP response;
@@ -101,7 +101,7 @@ func main() {
 	// send requests for each suffix for every prefix
 	for _, suffix := range suffixes {
 		for _, prefix := range prefixes {
-			requests <- request{url: prefix + suffix}
+			requests <- request{method: "GET", url: prefix + suffix}
 		}
 	}
 

@@ -12,12 +12,19 @@ import (
 func (r response) String() string {
 	b := &bytes.Buffer{}
 
-	b.WriteString(r.request.url)
-	b.WriteString("\n\n")
+	b.WriteString(fmt.Sprintf("> %s %s\n", r.request.method, r.request.url))
 
 	// request headers
+	for _, h := range r.request.headers {
+		b.WriteString(fmt.Sprintf("> %s\n", h))
+	}
+	b.WriteString("\n")
 
 	// response headers
+	for _, h := range r.headers {
+		b.WriteString(fmt.Sprintf("< %s\n", h))
+	}
+	b.WriteString("\n")
 
 	// body
 	b.Write(r.body)
