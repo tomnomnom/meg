@@ -28,6 +28,9 @@ func (r response) String() string {
 	}
 	b.WriteString("\n")
 
+	// status line
+	b.WriteString(fmt.Sprintf("< HTTP/1.1 %s\n", r.status))
+
 	// response headers
 	for _, h := range r.headers {
 		b.WriteString(fmt.Sprintf("< %s\n", h))
