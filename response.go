@@ -45,7 +45,8 @@ func (r response) String() string {
 
 func (r response) save(pathPrefix string) (string, error) {
 
-	checksum := sha1.Sum([]byte(r.request.url.String()))
+	content := []byte(r.String())
+	checksum := sha1.Sum(content)
 	parts := []string{pathPrefix}
 
 	parts = append(parts, r.request.url.Hostname())
@@ -60,7 +61,7 @@ func (r response) save(pathPrefix string) (string, error) {
 		}
 	}
 
-	err := ioutil.WriteFile(p, []byte(r.String()), 0640)
+	err := ioutil.WriteFile(p, content, 0640)
 	if err != nil {
 		return p, err
 	}
