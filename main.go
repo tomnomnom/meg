@@ -107,6 +107,12 @@ func main() {
 		outputDir = "./out"
 	}
 
+	err = os.MkdirAll(outputDir, 0750)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to create output directory: %s\n", err)
+		os.Exit(1)
+	}
+
 	// open the index file
 	indexFile := filepath.Join(outputDir, "index")
 	index, err := os.OpenFile(indexFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)

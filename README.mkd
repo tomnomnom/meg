@@ -1,5 +1,89 @@
 # meg
 
-meg is a toy tool I'm hacking on for requesting many URLs in parallel.
+meg is a tool for fetching URLs. Lot's of URLs.
 
-meg is not yet fit for human consumption.
+Given a file full of *prefixes*:
+
+```
+http://example.com
+https://example.com
+http://example.net
+```
+
+And a file full of *suffixes*:
+
+```
+/robots.txt
+/.well-known/security.txt
+/package.json
+```
+
+`meg` will request each *suffix* for every *prefix*:
+
+```
+▶ meg --verbose suffixes prefixes
+out/example.com/45ed6f717d44385c5e9c539b0ad8dc71771780e0 http://example.com/robots.txt (404 Not Found)
+out/example.com/61ac5fbb9d3dd054006ae82630b045ba730d8618 https://example.com/robots.txt (404 Not Found)
+out/example.net/1432c16b671043271eab84111242b1fe2a28eb98 http://example.net/robots.txt (404 Not Found)
+out/example.net/61deaa4fa10a6f601adb74519a900f1f0eca38b7 http://example.net/.well-known/security.txt (404 Not Found)
+out/example.com/20bc94a296f17ce7a4e2daa2946d0dc12128b3f1 http://example.com/.well-known/security.txt (404 Not Found)
+...
+```
+
+And save the output in a directory called `./out`:
+
+```
+▶ head -n 20 ./out/example.com/45ed6f717d44385c5e9c539b0ad8dc71771780e0
+http://example.com/robots.txt
+
+> GET /robots.txt HTTP/1.1
+> Host: example.com
+> User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36
+
+< HTTP/1.1 404 Not Found
+< Expires: Sat, 06 Jan 2018 01:05:38 GMT
+< Server: ECS (lga/13A2)
+< Accept-Ranges: bytes
+< Cache-Control: max-age=604800
+< Content-Type: text/*
+< Content-Length: 1270
+< Date: Sat, 30 Dec 2017 01:05:38 GMT
+< Last-Modified: Sun, 24 Dec 2017 06:53:36 GMT
+< X-Cache: 404-HIT
+
+<!doctype html>
+<html>
+<head>
+```
+
+Without any arguments, meg will read suffixes from a file called `suffixes`,
+and prefixes from a file called `prefixes`. There will also be no output:
+
+```
+▶ meg
+▶
+```
+
+But it will save an *index* file to `./out/index`:
+
+```
+▶ head -n 2 ./out/index
+out/example.com/538565d7ab544bc3bec5b2f0296783aaec25e756 http://example.com/package.json (404 Not Found)
+out/example.com/20bc94a296f17ce7a4e2daa2946d0dc12128b3f1 http://example.com/.well-known/security.txt (404 Not Found)
+```
+
+You can use the index file to find where the response is stored, but it's
+often easier to find what you're looking for with `grep`:
+
+```
+▶ grep -Hnri '< Server:' out/
+out/example.com/61ac5fbb9d3dd054006ae82630b045ba730d8618:14:< Server: ECS (lga/13A2)
+out/example.com/bd8d9f4c470ffa0e6ec8cfa8ba1c51d62289b6dd:16:< Server: ECS (lga/13A3)
+```
+
+
+## Install
+
+```
+▶ go get -u github.com/tomnomnom/meg
+```
