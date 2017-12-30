@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 )
 
 // a request is a wrapper for a URL that we want to request
@@ -49,6 +50,11 @@ func main() {
 	var concurrency = 20
 	flag.IntVar(&concurrency, "concurrency", 20, "")
 	flag.IntVar(&concurrency, "c", 20, "")
+
+	// delay param
+	var delay = 20
+	flag.IntVar(&delay, "delay", 5000, "")
+	flag.IntVar(&delay, "d", 5000, "")
 
 	// headers param
 	var headers headerArgs
@@ -121,6 +127,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	// set up a rate limiter
+	rl := &rateLimiter{
+		delay: time.Duration(delay * 1000000),
+		reqs:  make(map[string]time.Time),
+	}
+
 	// the request and response channels for
 	// the worker pool
 	requests := make(chan request)
@@ -133,6 +145,7 @@ func main() {
 
 		go func() {
 			for req := range requests {
+				rl.Block(req.url)
 				responses <- doRequest(req)
 			}
 			wg.Done()
@@ -197,6 +210,7 @@ func init() {
 
 		h += "Options:\n"
 		h += "  -c, --concurrency <val>    Set the concurrency level (defaut: 20)\n"
+		h += "  -d, --delay <val>          Milliseconds between requests to the same host (defaut: 5000)\n"
 		h += "  -H, --header <header>      Send a custom HTTP header\n"
 		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
 		h += "  -v, --verbose              Verbose mode\n"

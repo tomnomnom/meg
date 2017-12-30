@@ -110,6 +110,7 @@ Usage:
 
 Options:
   -c, --concurrency <val>    Set the concurrency level (defaut: 20)
+  -d, --delay <val>          Milliseconds between requests to the same host (defaut: 5000)
   -H, --header <header>      Send a custom HTTP header
   -s, --savestatus <status>  Save only responses with specific status code
   -v, --verbose              Verbose mode
@@ -146,6 +147,17 @@ with the `-c` or `--concurrency` option:
 
 It's not very friendly to keep the concurrency level higher than the number of
 prefixes - you may end up sending lots of requests to one host at once.
+
+### Delay
+By default meg will wait 5000 milliseconds between requests to the same host.
+You can override that with the `-d` or `--delay` option:
+
+```
+▶ meg --delay 10000
+```
+
+**Warning:** before reducing the delay, ensure that you have permission to make
+large volumes of requests to the hosts you're targetting.
 
 ### Adding Headers
 
