@@ -4,4 +4,6 @@ suffixes
 domains
 out
 *.swp
-
+*.tgz
+*.zip
+*.exe

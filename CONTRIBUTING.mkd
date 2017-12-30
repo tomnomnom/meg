@@ -1,0 +1,23 @@
+# Contributing
+
+* Raise an issue if appropriate
+* Fork the repo
+* Make your changes
+* Use [gofmt](https://golang.org/cmd/gofmt/)
+* Issue a pull request
+
+## Commit Messages
+I'd prefer it if commit messages describe what the *commit does*, not what *you did*.
+
+For example, I'd prefer:
+
+```
+Adds lint; removes fluff
+```
+
+Over:
+
+```
+Added lint; removed fluff
+```
+
