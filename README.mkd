@@ -2,6 +2,14 @@
 
 meg is a tool for fetching URLs. Lots of URLs.
 
+## Install
+
+```
+▶ go get -u github.com/tomnomnom/meg
+```
+
+## Basic Usage
+
 Given a file full of *suffixes*:
 
 ```
@@ -171,11 +179,4 @@ You can specify which HTTP method to use with the `-X` or `--method` option:
 out/example.com/61ac5fbb9d3dd054006ae82630b045ba730d8618:3:> TRACE /robots.txt HTTP/1.1
 out/example.com/bd8d9f4c470ffa0e6ec8cfa8ba1c51d62289b6dd:3:> TRACE /.well-known/security.txt HTTP/1.1
 ...
-```
-
-
-## Install
-
-```
-▶ go get -u github.com/tomnomnom/meg
 ```
