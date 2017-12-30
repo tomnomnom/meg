@@ -2,20 +2,20 @@
 
 meg is a tool for fetching URLs. Lot's of URLs.
 
-Given a file full of *prefixes*:
-
-```
-http://example.com
-https://example.com
-http://example.net
-```
-
-And a file full of *suffixes*:
+Given a file full of *suffixes*:
 
 ```
 /robots.txt
 /.well-known/security.txt
 /package.json
+```
+
+And a file full of *prefixes*:
+
+```
+http://example.com
+https://example.com
+http://example.net
 ```
 
 `meg` will request each *suffix* for every *prefix*:
