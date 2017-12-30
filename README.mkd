@@ -81,6 +81,98 @@ out/example.com/61ac5fbb9d3dd054006ae82630b045ba730d8618:14:< Server: ECS (lga/1
 out/example.com/bd8d9f4c470ffa0e6ec8cfa8ba1c51d62289b6dd:16:< Server: ECS (lga/13A3)
 ```
 
+If you want to request just one suffix, you can specify it directly as an argument:
+
+```
+▶ meg /admin.php
+```
+
+## Detailed Usage
+
+meg's help output tries to actually be helpful:
+
+```
+▶ meg --help
+Request many paths (suffixes) for many hosts (prefixes)
+
+Usage:
+  meg [suffix|suffixFile] [prefixFile] [outputDir]
+
+Options:
+  -c, --concurrency <val>    Set the concurrency level (defaut: 20)
+  -H, --header <header>      Send a custom HTTP header
+  -s, --savestatus <status>  Save only responses with specific status code
+  -v, --verbose              Verbose mode
+  -X, --method <method>      HTTP method (default: GET)
+
+Defaults:
+  suffixFile: ./suffixes
+  prefixFile: ./prefixes
+  outputDir:  ./out
+
+Suffix file format:
+  /robots.txt
+  /package.json
+  /security.txt
+
+Prefix file format:
+  http://example.com
+  https://example.edu
+  https://example.net
+
+Examples:
+  meg /robots.txt
+  meg hosts.txt paths.txt output
+```
+
+### Concurrency
+
+By default meg will attempt to make 20 concurrent requests. You can change that
+with the `-c` or `--concurrency` option:
+
+```
+▶ meg --concurrency 5
+```
+
+It's not very friendly to keep the concurrency level higher than the number of
+prefixes - you may end up sending lots of requests to one host at once.
+
+### Adding Headers
+
+You can set additional headers on the requests with the `-H` or `--header`
+option:
+
+```
+▶ meg --header "Origin: https://evil.com"
+▶ grep -h '^>' out/example.com/*
+> GET /.well-known/security.txt HTTP/1.1
+> Origin: https://evil.com
+> Host: example.com
+> User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36
+...
+```
+
+### Saving Only Certain Status Codes
+
+If you only want to save results that returned a certain status code, you can
+use the `-s` or `--savestatus` option:
+
+```
+▶ meg --savestatus 200 /robots.txt
+```
+
+### Specifying The Method
+
+You can specify which HTTP method to use with the `-X` or `--method` option:
+
+```
+▶ meg --method TRACE
+▶ grep -nri 'TRACE' out/
+out/example.com/61ac5fbb9d3dd054006ae82630b045ba730d8618:3:> TRACE /robots.txt HTTP/1.1
+out/example.com/bd8d9f4c470ffa0e6ec8cfa8ba1c51d62289b6dd:3:> TRACE /.well-known/security.txt HTTP/1.1
+...
+```
+
 
 ## Install
 
