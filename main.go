@@ -47,12 +47,12 @@ func (h headerArgs) String() string {
 func main() {
 
 	// concurrency param
-	var concurrency = 20
+	concurrency := 20
 	flag.IntVar(&concurrency, "concurrency", 20, "")
 	flag.IntVar(&concurrency, "c", 20, "")
 
 	// delay param
-	var delay = 20
+	delay := 5000
 	flag.IntVar(&delay, "delay", 5000, "")
 	flag.IntVar(&delay, "d", 5000, "")
 
