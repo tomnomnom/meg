@@ -1,6 +1,6 @@
 # meg
 
-meg is a tool for fetching URLs. Lot's of URLs.
+meg is a tool for fetching URLs. Lots of URLs.
 
 Given a file full of *suffixes*:
 
