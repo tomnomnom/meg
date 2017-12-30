@@ -10,11 +10,15 @@ flooded with traffic.
 
 ## Install
 
+meg is written in Go and has no run-time dependencies. You can install
+it with `go get`:
+
 ```
 ▶ go get -u github.com/tomnomnom/meg
 ```
 
-Or [download a binary](https://github.com/tomnomnom/meg/releases).
+Or [download a binary](https://github.com/tomnomnom/meg/releases) and
+put it somewhere in your `$PATH`.
 
 ## Basic Usage
 
@@ -163,7 +167,7 @@ You can override that with the `-d` or `--delay` option:
 ```
 
 **Warning:** before reducing the delay, ensure that you have permission to make
-large volumes of requests to the hosts you're targetting.
+large volumes of requests to the hosts you're targeting.
 
 ### Adding Headers
 
