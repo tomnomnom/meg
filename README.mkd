@@ -1,6 +1,12 @@
 # meg
 
-meg is a tool for fetching URLs. Lots of URLs.
+meg is a tool for fetching lots of URLs but still being 'nice' to servers.
+
+It can be used to fetch many paths for many hosts; fetching one path
+for all hosts before moving on to the next path and repeating.
+
+You get lots of results quickly, but non of the individual hosts get
+flooded with traffic.
 
 ## Install
 
