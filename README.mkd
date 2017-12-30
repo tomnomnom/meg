@@ -8,6 +8,8 @@ meg is a tool for fetching URLs. Lots of URLs.
 ▶ go get -u github.com/tomnomnom/meg
 ```
 
+Or [download a binary](https://github.com/tomnomnom/meg/releases).
+
 ## Basic Usage
 
 Given a file full of *suffixes*:
