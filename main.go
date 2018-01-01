@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"flag"
 	"fmt"
 	"net/url"
 	"os"
@@ -33,94 +32,41 @@ type response struct {
 // a requester is a function that makes HTTP requests
 type requester func(request) response
 
-type headerArgs []string
-
-func (h *headerArgs) Set(val string) error {
-	*h = append(*h, val)
-	return nil
-}
-
-func (h headerArgs) String() string {
-	return "string"
-}
-
 func main() {
 
-	// concurrency param
-	concurrency := 20
-	flag.IntVar(&concurrency, "concurrency", 20, "")
-	flag.IntVar(&concurrency, "c", 20, "")
+	// get the config struct
+	c := processArgs()
 
-	// delay param
-	delay := 5000
-	flag.IntVar(&delay, "delay", 5000, "")
-	flag.IntVar(&delay, "d", 5000, "")
-
-	// headers param
-	var headers headerArgs
-	flag.Var(&headers, "header", "")
-	flag.Var(&headers, "H", "")
-
-	// method param
-	method := "GET"
-	flag.StringVar(&method, "method", "GET", "")
-	flag.StringVar(&method, "X", "GET", "")
-
-	// savestatus param
-	saveStatus := 0
-	flag.IntVar(&saveStatus, "savestatus", 0, "")
-	flag.IntVar(&saveStatus, "s", 0, "")
-
-	// verbose param
-	verbose := false
-	flag.BoolVar(&verbose, "verbose", false, "")
-	flag.BoolVar(&verbose, "v", false, "")
-
-	flag.Parse()
-
-	// suffixes might be in a file, or it might be a single value
-	suffixArg := flag.Arg(0)
-	if suffixArg == "" {
-		suffixArg = "suffixes"
-	}
+	// if the suffix argument is a file, read it; otherwise
+	// treat it as a literal value
 	var suffixes []string
-	if f, err := os.Stat(suffixArg); err == nil && f.Mode().IsRegular() {
-		lines, err := readLines(suffixArg)
+	if isFile(c.suffix) {
+		lines, err := readLines(c.suffix)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "failed to open suffix file: %s\n", err)
 			os.Exit(1)
 		}
 		suffixes = lines
-	} else if suffixArg != "suffixes" {
-		// don't treat the default suffixes filename as a literal value
-		suffixes = []string{suffixArg}
+	} else if c.suffix != "suffixes" {
+		suffixes = []string{c.suffix}
 	}
 
-	// prefixes are always in a file
-	prefixFile := flag.Arg(1)
-	if prefixFile == "" {
-		prefixFile = "prefixes"
-	}
-	prefixes, err := readLines(prefixFile)
+	// read the prefix file
+	prefixes, err := readLines(c.prefix)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to open prefix file: %s\n", err)
 		os.Exit(1)
 	}
 
-	// default the output directory to ./out
-	outputDir := flag.Arg(2)
-	if outputDir == "" {
-		outputDir = "./out"
-	}
-
-	err = os.MkdirAll(outputDir, 0750)
+	// make the output directory
+	err = os.MkdirAll(c.output, 0750)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to create output directory: %s\n", err)
 		os.Exit(1)
 	}
 
 	// open the index file
-	indexFile := filepath.Join(outputDir, "index")
+	indexFile := filepath.Join(c.output, "index")
 	index, err := os.OpenFile(indexFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to open index file for writing: %s\n", err)
@@ -129,7 +75,7 @@ func main() {
 
 	// set up a rate limiter
 	rl := &rateLimiter{
-		delay: time.Duration(delay * 1000000),
+		delay: time.Duration(c.delay * 1000000),
 		reqs:  make(map[string]time.Time),
 	}
 
@@ -140,7 +86,7 @@ func main() {
 
 	// spin up some workers to do the requests
 	var wg sync.WaitGroup
-	for i := 0; i < concurrency; i++ {
+	for i := 0; i < c.concurrency; i++ {
 		wg.Add(1)
 
 		go func() {
@@ -158,18 +104,18 @@ func main() {
 	owg.Add(1)
 	go func() {
 		for res := range responses {
-			if saveStatus != 0 && saveStatus != res.statusCode {
+			if c.saveStatus != 0 && c.saveStatus != res.statusCode {
 				continue
 			}
 
-			path, err := res.save(outputDir)
+			path, err := res.save(c.output)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "failed to save file: %s\n", err)
 			}
 
 			line := fmt.Sprintf("%s %s (%s)\n", path, res.request.url, res.status)
 			fmt.Fprintf(index, "%s", line)
-			if verbose {
+			if c.verbose {
 				fmt.Printf("%s", line)
 			}
 		}
@@ -184,7 +130,7 @@ func main() {
 				fmt.Printf("failed to parse url: %s\n", err)
 				continue
 			}
-			requests <- request{method: method, url: u, headers: headers}
+			requests <- request{method: c.method, url: u, headers: c.headers}
 		}
 	}
 
@@ -199,44 +145,6 @@ func main() {
 
 	owg.Wait()
 
-}
-
-func init() {
-	flag.Usage = func() {
-		h := "Request many paths (suffixes) for many hosts (prefixes)\n\n"
-
-		h += "Usage:\n"
-		h += "  meg [suffix|suffixFile] [prefixFile] [outputDir]\n\n"
-
-		h += "Options:\n"
-		h += "  -c, --concurrency <val>    Set the concurrency level (defaut: 20)\n"
-		h += "  -d, --delay <val>          Milliseconds between requests to the same host (defaut: 5000)\n"
-		h += "  -H, --header <header>      Send a custom HTTP header\n"
-		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
-		h += "  -v, --verbose              Verbose mode\n"
-		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
-
-		h += "Defaults:\n"
-		h += "  suffixFile: ./suffixes\n"
-		h += "  prefixFile: ./prefixes\n"
-		h += "  outputDir:  ./out\n\n"
-
-		h += "Suffix file format:\n"
-		h += "  /robots.txt\n"
-		h += "  /package.json\n"
-		h += "  /security.txt\n\n"
-
-		h += "Prefix file format:\n"
-		h += "  http://example.com\n"
-		h += "  https://example.edu\n"
-		h += "  https://example.net\n\n"
-
-		h += "Examples:\n"
-		h += "  meg /robots.txt\n"
-		h += "  meg hosts.txt paths.txt output\n"
-
-		fmt.Fprintf(os.Stderr, h)
-	}
 }
 
 // readLines reads all of the lines from a text file in to
@@ -255,4 +163,10 @@ func readLines(filename string) ([]string, error) {
 	}
 
 	return lines, sc.Err()
+}
+
+// isFile returns true if its argument is a regular file
+func isFile(path string) bool {
+	f, err := os.Stat(path)
+	return err == nil && f.Mode().IsRegular()
 }

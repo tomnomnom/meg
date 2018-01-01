@@ -20,7 +20,7 @@ func (r *rateLimiter) Block(u *url.URL) {
 
 	// if there's nothing in the map we can
 	// return straight away
-	if _, ok := r.reqs[u.Hostname()]; !ok {
+	if _, ok := r.reqs[key]; !ok {
 		r.reqs[key] = now
 		r.Unlock()
 		return
