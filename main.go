@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+const userAgent = "Mozilla/5.0 (compatible; meg/0.1; +https://github.com/tomnomnom/meg)"
+
 // a requester is a function that makes HTTP requests
 type requester func(request) response
 

@@ -31,8 +31,14 @@ func doRequest(r request) response {
 	}
 	req.Close = true
 
-	// add the host header to the request manually so it shows up in the output
-	r.headers = append(r.headers, fmt.Sprintf("Host: %s", r.Hostname()))
+	if !r.HasHeader("Host") {
+		// add the host header to the request manually so it shows up in the output
+		r.headers = append(r.headers, fmt.Sprintf("Host: %s", r.Hostname()))
+	}
+
+	if !r.HasHeader("User-Agent") {
+		r.headers = append(r.headers, fmt.Sprintf("User-Agent: %s", userAgent))
+	}
 
 	for _, h := range r.headers {
 		parts := strings.SplitN(h, ":", 2)
