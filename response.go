@@ -9,18 +9,26 @@ import (
 	"path"
 )
 
+// a response is a wrapper around an HTTP response;
+// it contains the request value for context.
+type response struct {
+	request request
+
+	status     string
+	statusCode int
+	headers    []string
+	body       []byte
+	err        error
+}
+
+// String returns a string representation of the request and response
 func (r response) String() string {
 	b := &bytes.Buffer{}
 
-	b.WriteString(r.request.url.String())
+	b.WriteString(r.request.URL())
 	b.WriteString("\n\n")
 
-	qs := ""
-	if len(r.request.url.Query()) > 0 {
-		qs = "?" + r.request.url.Query().Encode()
-	}
-
-	b.WriteString(fmt.Sprintf("> %s %s%s HTTP/1.1\n", r.request.method, r.request.url.EscapedPath(), qs))
+	b.WriteString(fmt.Sprintf("> %s %s HTTP/1.1\n", r.request.method, r.request.suffix))
 
 	// request headers
 	for _, h := range r.request.headers {
@@ -43,13 +51,14 @@ func (r response) String() string {
 	return b.String()
 }
 
+// save write a request and response output to disk
 func (r response) save(pathPrefix string) (string, error) {
 
 	content := []byte(r.String())
 	checksum := sha1.Sum(content)
 	parts := []string{pathPrefix}
 
-	parts = append(parts, r.request.url.Hostname())
+	parts = append(parts, r.request.Hostname())
 	parts = append(parts, fmt.Sprintf("%x", checksum))
 
 	p := path.Join(parts...)

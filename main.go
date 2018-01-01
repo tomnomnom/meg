@@ -3,31 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"net/url"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
 )
-
-// a request is a wrapper for a URL that we want to request
-type request struct {
-	method  string
-	url     *url.URL
-	headers []string
-}
-
-// a response is a wrapper around an HTTP response;
-// it contains the request value for context.
-type response struct {
-	request request
-
-	status     string
-	statusCode int
-	headers    []string
-	body       []byte
-	err        error
-}
 
 // a requester is a function that makes HTTP requests
 type requester func(request) response
@@ -74,10 +54,7 @@ func main() {
 	}
 
 	// set up a rate limiter
-	rl := &rateLimiter{
-		delay: time.Duration(c.delay * 1000000),
-		reqs:  make(map[string]time.Time),
-	}
+	rl := newRateLimiter(time.Duration(c.delay * 1000000))
 
 	// the request and response channels for
 	// the worker pool
@@ -91,7 +68,7 @@ func main() {
 
 		go func() {
 			for req := range requests {
-				rl.Block(req.url)
+				rl.Block(req.Hostname())
 				responses <- doRequest(req)
 			}
 			wg.Done()
@@ -113,7 +90,7 @@ func main() {
 				fmt.Fprintf(os.Stderr, "failed to save file: %s\n", err)
 			}
 
-			line := fmt.Sprintf("%s %s (%s)\n", path, res.request.url, res.status)
+			line := fmt.Sprintf("%s %s (%s)\n", path, res.request.URL(), res.status)
 			fmt.Fprintf(index, "%s", line)
 			if c.verbose {
 				fmt.Printf("%s", line)
@@ -125,12 +102,13 @@ func main() {
 	// send requests for each suffix for every prefix
 	for _, suffix := range suffixes {
 		for _, prefix := range prefixes {
-			u, err := url.Parse(prefix + suffix)
-			if err != nil {
-				fmt.Printf("failed to parse url: %s\n", err)
-				continue
+
+			requests <- request{
+				method:  c.method,
+				prefix:  prefix,
+				suffix:  suffix,
+				headers: c.headers,
 			}
-			requests <- request{method: c.method, url: u, headers: c.headers}
 		}
 	}
 
