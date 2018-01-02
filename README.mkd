@@ -121,6 +121,7 @@ Options:
   -c, --concurrency <val>    Set the concurrency level (defaut: 20)
   -d, --delay <val>          Milliseconds between requests to the same host (defaut: 5000)
   -H, --header <header>      Send a custom HTTP header
+  -r, --rawhttp              Use the rawhttp library for requests (experimental)
   -s, --savestatus <status>  Save only responses with specific status code
   -v, --verbose              Verbose mode
   -X, --method <method>      HTTP method (default: GET)
@@ -181,6 +182,28 @@ option:
 > Host: example.com
 ...
 ```
+
+### Raw HTTP (Experimental)
+
+If you want to send requests that aren't valid - for example with invalid URL encoding -
+the Go HTTP client will fail:
+
+```
+▶ meg /%%0a0afoo:bar
+request failed: parse https://example.org/%%0a0afoo:bar: invalid URL escape "%%0"
+```
+
+You can use the `-r` or `--rawhttp` flag to enable use of the [rawhttp](https://github.com/tomnomnom/rawhttp)
+library, which does little to no validation on the request:
+
+```
+▶ meg --verbose --rawhttp /%%0a0afoo:bar
+out/example.com/eac3a4978bfb95992e270c311582e6da4568d83d https://example.com/%%0a0afoo:bar (HTTP/1.1 404 Not Found)
+```
+
+The `rawhttp` library and its use is experimental. Amongst other things it doesn't
+yet support chunked transfer encoding, so you may notice chunk lengths interspersed
+with your output if you use it.
 
 ### Saving Only Certain Status Codes
 
