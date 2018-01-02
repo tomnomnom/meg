@@ -87,6 +87,11 @@ func main() {
 				continue
 			}
 
+			if res.err != nil {
+				fmt.Fprintf(os.Stderr, "request failed: %s\n", res.err)
+				continue
+			}
+
 			path, err := res.save(c.output)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "failed to save file: %s\n", err)
