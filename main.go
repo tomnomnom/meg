@@ -71,7 +71,7 @@ func main() {
 		go func() {
 			for req := range requests {
 				rl.Block(req.Hostname())
-				responses <- doRequest(req)
+				responses <- c.requester(req)
 			}
 			wg.Done()
 		}()

@@ -24,6 +24,7 @@ type config struct {
 	headers     headerArgs
 	method      string
 	saveStatus  int
+	requester   requester
 	verbose     bool
 	suffix      string
 	prefix      string
@@ -57,10 +58,19 @@ func processArgs() config {
 	flag.IntVar(&saveStatus, "savestatus", 0, "")
 	flag.IntVar(&saveStatus, "s", 0, "")
 
+	// rawhttp param
+	rawHTTP := false
+	flag.BoolVar(&rawHTTP, "rawhttp", false, "")
+	flag.BoolVar(&rawHTTP, "r", false, "")
+
 	// verbose param
 	verbose := false
 	flag.BoolVar(&verbose, "verbose", false, "")
 	flag.BoolVar(&verbose, "v", false, "")
+
+	if verbose {
+		fmt.Println("sdgfsd")
+	}
 
 	flag.Parse()
 
@@ -82,12 +92,19 @@ func processArgs() config {
 		output = "./out"
 	}
 
+	// set the requester function to use
+	requesterFn := goRequest
+	if rawHTTP {
+		requesterFn = rawRequest
+	}
+
 	return config{
 		concurrency: concurrency,
 		delay:       delay,
 		headers:     headers,
 		method:      method,
 		saveStatus:  saveStatus,
+		requester:   requesterFn,
 		verbose:     verbose,
 		suffix:      suffix,
 		prefix:      prefix,
@@ -106,6 +123,7 @@ func init() {
 		h += "  -c, --concurrency <val>    Set the concurrency level (defaut: 20)\n"
 		h += "  -d, --delay <val>          Milliseconds between requests to the same host (defaut: 5000)\n"
 		h += "  -H, --header <header>      Send a custom HTTP header\n"
+		h += "  -r, --rawhttp              Use the rawhttp library for requests (experimental)\n"
 		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
 		h += "  -v, --verbose              Verbose mode\n"
 		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"

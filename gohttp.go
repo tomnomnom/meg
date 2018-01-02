@@ -23,7 +23,7 @@ var httpClient = &http.Client{
 	Timeout:       time.Second * 10,
 }
 
-func doRequest(r request) response {
+func goRequest(r request) response {
 
 	req, err := http.NewRequest(r.method, r.URL(), nil)
 	if err != nil {
