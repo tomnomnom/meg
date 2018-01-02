@@ -13,6 +13,8 @@ func rawRequest(r request) response {
 		return response{request: r, err: err}
 	}
 
+	req.Path = r.suffix
+
 	r.headers = append(r.headers, "Connection: close")
 
 	if !r.HasHeader("Host") {
