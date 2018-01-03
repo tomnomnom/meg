@@ -119,7 +119,7 @@ func main() {
 				fmt.Fprintf(os.Stderr, "failed to parse host: %s\n", err)
 				continue
 			}
-			path = u.Path + path
+			prefixedPath := u.Path + path
 			u.Path = ""
 
 			// stripping off a path means we need to
@@ -129,7 +129,7 @@ func main() {
 			requests <- request{
 				method:  c.method,
 				host:    host,
-				path:    path,
+				path:    prefixedPath,
 				headers: c.headers,
 			}
 		}
