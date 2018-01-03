@@ -28,7 +28,7 @@ func (r response) String() string {
 	b.WriteString(r.request.URL())
 	b.WriteString("\n\n")
 
-	b.WriteString(fmt.Sprintf("> %s %s HTTP/1.1\n", r.request.method, r.request.suffix))
+	b.WriteString(fmt.Sprintf("> %s %s HTTP/1.1\n", r.request.method, r.request.path))
 
 	// request headers
 	for _, h := range r.request.headers {

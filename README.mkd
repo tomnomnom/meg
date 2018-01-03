@@ -22,7 +22,7 @@ put it somewhere in your `$PATH`.
 
 ## Basic Usage
 
-Given a file full of *suffixes*:
+Given a file full of paths:
 
 ```
 /robots.txt
@@ -30,7 +30,7 @@ Given a file full of *suffixes*:
 /package.json
 ```
 
-And a file full of *prefixes*:
+And a file full of hosts (with a protocol):
 
 ```
 http://example.com
@@ -38,10 +38,10 @@ https://example.com
 http://example.net
 ```
 
-`meg` will request each *suffix* for every *prefix*:
+`meg` will request each *path* for every *host*:
 
 ```
-▶ meg --verbose suffixes prefixes
+▶ meg --verbose paths hosts
 out/example.com/45ed6f717d44385c5e9c539b0ad8dc71771780e0 http://example.com/robots.txt (404 Not Found)
 out/example.com/61ac5fbb9d3dd054006ae82630b045ba730d8618 https://example.com/robots.txt (404 Not Found)
 out/example.net/1432c16b671043271eab84111242b1fe2a28eb98 http://example.net/robots.txt (404 Not Found)
@@ -75,8 +75,8 @@ http://example.com/robots.txt
 <head>
 ```
 
-Without any arguments, meg will read suffixes from a file called `suffixes`,
-and prefixes from a file called `prefixes`. There will also be no output:
+Without any arguments, meg will read paths from a file called `./paths`,
+and hosts from a file called `./hosts`. There will also be no output:
 
 ```
 ▶ meg
@@ -100,7 +100,7 @@ out/example.com/61ac5fbb9d3dd054006ae82630b045ba730d8618:14:< Server: ECS (lga/1
 out/example.com/bd8d9f4c470ffa0e6ec8cfa8ba1c51d62289b6dd:16:< Server: ECS (lga/13A3)
 ```
 
-If you want to request just one suffix, you can specify it directly as an argument:
+If you want to request just one path, you can specify it directly as an argument:
 
 ```
 ▶ meg /admin.php
@@ -112,10 +112,10 @@ meg's help output tries to actually be helpful:
 
 ```
 ▶ meg --help
-Request many paths (suffixes) for many hosts (prefixes)
+Request many paths for many hosts
 
 Usage:
-  meg [suffix|suffixFile] [prefixFile] [outputDir]
+  meg [path|pathsFile] [hostsFile] [outputDir]
 
 Options:
   -c, --concurrency <val>    Set the concurrency level (defaut: 20)
@@ -127,16 +127,16 @@ Options:
   -X, --method <method>      HTTP method (default: GET)
 
 Defaults:
-  suffixFile: ./suffixes
-  prefixFile: ./prefixes
+  pathsFile: ./paths
+  hostsFile: ./hosts
   outputDir:  ./out
 
-Suffix file format:
+Paths file format:
   /robots.txt
   /package.json
   /security.txt
 
-Prefix file format:
+Hosts file format:
   http://example.com
   https://example.edu
   https://example.net
@@ -156,7 +156,7 @@ with the `-c` or `--concurrency` option:
 ```
 
 It's not very friendly to keep the concurrency level higher than the number of
-prefixes - you may end up sending lots of requests to one host at once.
+hosts - you may end up sending lots of requests to one host at once.
 
 ### Delay
 By default meg will wait 5000 milliseconds between requests to the same host.

@@ -8,12 +8,12 @@ import (
 )
 
 func rawRequest(r request) response {
-	req, err := rawhttp.FromURL(r.method, r.prefix)
+	req, err := rawhttp.FromURL(r.method, r.host)
 	if err != nil {
 		return response{request: r, err: err}
 	}
 
-	req.Path = r.suffix
+	req.Path = r.path
 
 	r.headers = append(r.headers, "Connection: close")
 

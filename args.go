@@ -26,8 +26,8 @@ type config struct {
 	saveStatus  int
 	requester   requester
 	verbose     bool
-	suffix      string
-	prefix      string
+	paths       string
+	hosts       string
 	output      string
 }
 
@@ -74,16 +74,16 @@ func processArgs() config {
 
 	flag.Parse()
 
-	// suffixes might be in a file, or it might be a single value
-	suffix := flag.Arg(0)
-	if suffix == "" {
-		suffix = "suffixes"
+	// paths might be in a file, or it might be a single value
+	paths := flag.Arg(0)
+	if paths == "" {
+		paths = "paths"
 	}
 
-	// prefixes are always in a file
-	prefix := flag.Arg(1)
-	if prefix == "" {
-		prefix = "prefixes"
+	// hosts are always in a file
+	hosts := flag.Arg(1)
+	if hosts == "" {
+		hosts = "hosts"
 	}
 
 	// default the output directory to ./out
@@ -106,18 +106,18 @@ func processArgs() config {
 		saveStatus:  saveStatus,
 		requester:   requesterFn,
 		verbose:     verbose,
-		suffix:      suffix,
-		prefix:      prefix,
+		paths:       paths,
+		hosts:       hosts,
 		output:      output,
 	}
 }
 
 func init() {
 	flag.Usage = func() {
-		h := "Request many paths (suffixes) for many hosts (prefixes)\n\n"
+		h := "Request many paths for many hosts\n\n"
 
 		h += "Usage:\n"
-		h += "  meg [suffix|suffixFile] [prefixFile] [outputDir]\n\n"
+		h += "  meg [path|pathsFile] [hostsFile] [outputDir]\n\n"
 
 		h += "Options:\n"
 		h += "  -c, --concurrency <val>    Set the concurrency level (defaut: 20)\n"
@@ -129,16 +129,16 @@ func init() {
 		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
 
 		h += "Defaults:\n"
-		h += "  suffixFile: ./suffixes\n"
-		h += "  prefixFile: ./prefixes\n"
+		h += "  pathsFile: ./paths\n"
+		h += "  hostsFile: ./hosts\n"
 		h += "  outputDir:  ./out\n\n"
 
-		h += "Suffix file format:\n"
+		h += "Paths file format:\n"
 		h += "  /robots.txt\n"
 		h += "  /package.json\n"
 		h += "  /security.txt\n\n"
 
-		h += "Prefix file format:\n"
+		h += "Hosts file format:\n"
 		h += "  http://example.com\n"
 		h += "  https://example.edu\n"
 		h += "  https://example.net\n\n"

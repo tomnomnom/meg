@@ -8,14 +8,14 @@ import (
 // a request is a wrapper for a URL that we want to request
 type request struct {
 	method  string
-	prefix  string
-	suffix  string
+	path    string
+	host    string
 	headers []string
 }
 
 // Hostname returns the hostname part of the request
 func (r request) Hostname() string {
-	u, err := url.Parse(r.prefix)
+	u, err := url.Parse(r.host)
 
 	// the hostname part is used only for the rate
 	// limiting and the
@@ -27,7 +27,7 @@ func (r request) Hostname() string {
 
 // URL returns the full URL to request
 func (r request) URL() string {
-	return r.prefix + r.suffix
+	return r.host + r.path
 }
 
 // hasHeader returns true if the request

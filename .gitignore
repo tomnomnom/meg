@@ -1,6 +1,8 @@
 meg
 prefixes
+hosts
 suffixes
+paths
 domains
 out
 *.swp

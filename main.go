@@ -19,24 +19,24 @@ func main() {
 	// get the config struct
 	c := processArgs()
 
-	// if the suffix argument is a file, read it; otherwise
+	// if the paths argument is a file, read it; otherwise
 	// treat it as a literal value
-	var suffixes []string
-	if isFile(c.suffix) {
-		lines, err := readLines(c.suffix)
+	var paths []string
+	if isFile(c.paths) {
+		lines, err := readLines(c.paths)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "failed to open suffix file: %s\n", err)
+			fmt.Fprintf(os.Stderr, "failed to open paths file: %s\n", err)
 			os.Exit(1)
 		}
-		suffixes = lines
-	} else if c.suffix != "suffixes" {
-		suffixes = []string{c.suffix}
+		paths = lines
+	} else if c.paths != "paths" {
+		paths = []string{c.paths}
 	}
 
-	// read the prefix file
-	prefixes, err := readLines(c.prefix)
+	// read the hosts file
+	hosts, err := readLines(c.hosts)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to open prefix file: %s\n", err)
+		fmt.Fprintf(os.Stderr, "failed to open hosts file: %s\n", err)
 		os.Exit(1)
 	}
 
@@ -106,14 +106,14 @@ func main() {
 		owg.Done()
 	}()
 
-	// send requests for each suffix for every prefix
-	for _, suffix := range suffixes {
-		for _, prefix := range prefixes {
+	// send requests for each path for every host
+	for _, path := range paths {
+		for _, host := range hosts {
 
 			requests <- request{
 				method:  c.method,
-				prefix:  prefix,
-				suffix:  suffix,
+				host:    host,
+				path:    path,
 				headers: c.headers,
 			}
 		}
