@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/tomnomnom/rawhttp"
 )
@@ -41,9 +42,16 @@ func rawRequest(r request) response {
 		return response{request: r, err: err}
 	}
 
+	// This should be done in rawhttp too. Whoops.
+	status := resp.StatusLine()
+	p := strings.SplitN(resp.StatusLine(), " ", 2)
+	if len(p) == 2 {
+		status = p[1]
+	}
+
 	return response{
 		request:    r,
-		status:     resp.StatusLine(),
+		status:     status,
 		statusCode: code,
 		headers:    resp.Headers(),
 		body:       resp.Body(),
