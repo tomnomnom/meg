@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sync"
@@ -109,6 +110,21 @@ func main() {
 	// send requests for each path for every host
 	for _, path := range paths {
 		for _, host := range hosts {
+
+			// the host portion may contain a path prefix,
+			// so we should strip that off and add it to
+			// the beginning of the path.
+			u, err := url.Parse(host)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "failed to parse host: %s\n", err)
+				continue
+			}
+			path = u.Path + path
+			u.Path = ""
+
+			// stripping off a path means we need to
+			// rebuild the host portion too
+			host = u.String()
 
 			requests <- request{
 				method:  c.method,
