@@ -19,16 +19,19 @@ func (h headerArgs) String() string {
 }
 
 type config struct {
-	concurrency int
-	delay       int
-	headers     headerArgs
-	method      string
-	saveStatus  int
-	requester   requester
-	verbose     bool
-	paths       string
-	hosts       string
-	output      string
+	concurrency    int
+	delay          int
+	headers        headerArgs
+	followLocation bool
+	method         string
+	saveStatus     int
+	verbose        bool
+
+	paths  string
+	hosts  string
+	output string
+
+	requester requester
 }
 
 func processArgs() config {
@@ -47,6 +50,11 @@ func processArgs() config {
 	var headers headerArgs
 	flag.Var(&headers, "header", "")
 	flag.Var(&headers, "H", "")
+
+	// follow location param
+	followLocation := false
+	flag.BoolVar(&followLocation, "location", false, "")
+	flag.BoolVar(&followLocation, "L", false, "")
 
 	// method param
 	method := "GET"
@@ -95,16 +103,17 @@ func processArgs() config {
 	}
 
 	return config{
-		concurrency: concurrency,
-		delay:       delay,
-		headers:     headers,
-		method:      method,
-		saveStatus:  saveStatus,
-		requester:   requesterFn,
-		verbose:     verbose,
-		paths:       paths,
-		hosts:       hosts,
-		output:      output,
+		concurrency:    concurrency,
+		delay:          delay,
+		headers:        headers,
+		followLocation: followLocation,
+		method:         method,
+		saveStatus:     saveStatus,
+		requester:      requesterFn,
+		verbose:        verbose,
+		paths:          paths,
+		hosts:          hosts,
+		output:         output,
 	}
 }
 
@@ -119,6 +128,7 @@ func init() {
 		h += "  -c, --concurrency <val>    Set the concurrency level (defaut: 20)\n"
 		h += "  -d, --delay <val>          Milliseconds between requests to the same host (defaut: 5000)\n"
 		h += "  -H, --header <header>      Send a custom HTTP header\n"
+		h += "  -L, --location             Follow redirects / location header\n"
 		h += "  -r, --rawhttp              Use the rawhttp library for requests (experimental)\n"
 		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
 		h += "  -v, --verbose              Verbose mode\n"

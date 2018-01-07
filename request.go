@@ -11,6 +11,8 @@ type request struct {
 	path    string
 	host    string
 	headers []string
+
+	followLocation bool
 }
 
 // Hostname returns the hostname part of the request

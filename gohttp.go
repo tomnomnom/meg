@@ -13,17 +13,18 @@ var transport = &http.Transport{
 	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 }
 
-var checkRedirect = func(req *http.Request, via []*http.Request) error {
-	return http.ErrUseLastResponse
-}
-
 var httpClient = &http.Client{
-	Transport:     transport,
-	CheckRedirect: checkRedirect,
-	Timeout:       time.Second * 10,
+	Transport: transport,
+	Timeout:   time.Second * 10,
 }
 
 func goRequest(r request) response {
+
+	if !r.followLocation {
+		httpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}
+	}
 
 	req, err := http.NewRequest(r.method, r.URL(), nil)
 	if err != nil {

@@ -127,10 +127,11 @@ func main() {
 			host = u.String()
 
 			requests <- request{
-				method:  c.method,
-				host:    host,
-				path:    prefixedPath,
-				headers: c.headers,
+				method:         c.method,
+				host:           host,
+				path:           prefixedPath,
+				headers:        c.headers,
+				followLocation: c.followLocation,
 			}
 		}
 	}
