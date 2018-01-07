@@ -10,7 +10,14 @@ import (
 	"time"
 )
 
-const userAgent = "Mozilla/5.0 (compatible; meg/0.1; +https://github.com/tomnomnom/meg)"
+const (
+	userAgent = "Mozilla/5.0 (compatible; meg/0.2; +https://github.com/tomnomnom/meg)"
+
+	// argument defaults
+	defaultPathsFile = "./paths"
+	defaultHostsFile = "./hosts"
+	defaultOutputDir = "./out"
+)
 
 // a requester is a function that makes HTTP requests
 type requester func(request) response
@@ -20,22 +27,15 @@ func main() {
 	// get the config struct
 	c := processArgs()
 
-	// if the paths argument is a file, read it; otherwise
-	// treat it as a literal value
-	var paths []string
-	if isFile(c.paths) {
-		lines, err := readLines(c.paths)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "failed to open paths file: %s\n", err)
-			os.Exit(1)
-		}
-		paths = lines
-	} else if c.paths != "paths" {
-		paths = []string{c.paths}
+	// read the paths file
+	paths, err := readLinesOrLiteral(c.paths, defaultPathsFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to open paths file: %s\n", err)
+		os.Exit(1)
 	}
 
 	// read the hosts file
-	hosts, err := readLines(c.hosts)
+	hosts, err := readLinesOrLiteral(c.hosts, defaultHostsFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to open hosts file: %s\n", err)
 		os.Exit(1)
@@ -164,6 +164,23 @@ func readLines(filename string) ([]string, error) {
 	}
 
 	return lines, sc.Err()
+}
+
+// readLinesOrLiteral tries to read lines from a file, returning
+// the arg in a string slice if the file doesn't exist, unless
+// the arg matches its default value
+func readLinesOrLiteral(arg, argDefault string) ([]string, error) {
+	if isFile(arg) {
+		return readLines(arg)
+	}
+
+	// if the argument isn't a file, but it is the default, don't
+	// treat it as a literal value
+	if arg == argDefault {
+		return []string{}, fmt.Errorf("file %s not found", arg)
+	}
+
+	return []string{arg}, nil
 }
 
 // isFile returns true if its argument is a regular file

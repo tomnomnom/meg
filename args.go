@@ -68,28 +68,24 @@ func processArgs() config {
 	flag.BoolVar(&verbose, "verbose", false, "")
 	flag.BoolVar(&verbose, "v", false, "")
 
-	if verbose {
-		fmt.Println("sdgfsd")
-	}
-
 	flag.Parse()
 
 	// paths might be in a file, or it might be a single value
 	paths := flag.Arg(0)
 	if paths == "" {
-		paths = "paths"
+		paths = defaultPathsFile
 	}
 
 	// hosts are always in a file
 	hosts := flag.Arg(1)
 	if hosts == "" {
-		hosts = "hosts"
+		hosts = defaultHostsFile
 	}
 
 	// default the output directory to ./out
 	output := flag.Arg(2)
 	if output == "" {
-		output = "./out"
+		output = defaultOutputDir
 	}
 
 	// set the requester function to use
