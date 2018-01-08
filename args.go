@@ -25,6 +25,7 @@ type config struct {
 	followLocation bool
 	method         string
 	saveStatus     int
+	timeout        int
 	verbose        bool
 
 	paths  string
@@ -65,6 +66,11 @@ func processArgs() config {
 	saveStatus := 0
 	flag.IntVar(&saveStatus, "savestatus", 0, "")
 	flag.IntVar(&saveStatus, "s", 0, "")
+
+	// timeout param
+	timeout := 10000
+	flag.IntVar(&timeout, "timeout", 10000, "")
+	flag.IntVar(&timeout, "t", 10000, "")
 
 	// rawhttp param
 	rawHTTP := false
@@ -109,6 +115,7 @@ func processArgs() config {
 		followLocation: followLocation,
 		method:         method,
 		saveStatus:     saveStatus,
+		timeout:        timeout,
 		requester:      requesterFn,
 		verbose:        verbose,
 		paths:          paths,
@@ -126,11 +133,12 @@ func init() {
 
 		h += "Options:\n"
 		h += "  -c, --concurrency <val>    Set the concurrency level (defaut: 20)\n"
-		h += "  -d, --delay <val>          Milliseconds between requests to the same host (defaut: 5000)\n"
+		h += "  -d, --delay <millis>       Milliseconds between requests to the same host (defaut: 5000)\n"
 		h += "  -H, --header <header>      Send a custom HTTP header\n"
 		h += "  -L, --location             Follow redirects / location header\n"
 		h += "  -r, --rawhttp              Use the rawhttp library for requests (experimental)\n"
 		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
+		h += "  -t, --timeout <millis>     Set the HTTP timeout (default: 10000)\n"
 		h += "  -v, --verbose              Verbose mode\n"
 		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
 

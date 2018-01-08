@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"time"
 )
 
 var transport = &http.Transport{
@@ -15,10 +14,10 @@ var transport = &http.Transport{
 
 var httpClient = &http.Client{
 	Transport: transport,
-	Timeout:   time.Second * 10,
 }
 
 func goRequest(r request) response {
+	httpClient.Timeout = r.timeout
 
 	if !r.followLocation {
 		httpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {

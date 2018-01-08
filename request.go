@@ -3,6 +3,7 @@ package main
 import (
 	"net/url"
 	"strings"
+	"time"
 )
 
 // a request is a wrapper for a URL that we want to request
@@ -13,6 +14,7 @@ type request struct {
 	headers []string
 
 	followLocation bool
+	timeout        time.Duration
 }
 
 // Hostname returns the hostname part of the request
