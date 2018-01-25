@@ -159,7 +159,7 @@ func init() {
 
 		h += "Examples:\n"
 		h += "  meg /robots.txt\n"
-		h += "  meg hosts.txt paths.txt output\n"
+		h += "  meg paths.txt hosts.txt output\n"
 
 		fmt.Fprintf(os.Stderr, h)
 	}
