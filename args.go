@@ -23,7 +23,6 @@ type config struct {
 	delay          int
 	headers        headerArgs
 	followLocation bool
-	noPath         bool
 	method         string
 	saveStatus     int
 	timeout        int
@@ -57,10 +56,6 @@ func processArgs() config {
 	followLocation := false
 	flag.BoolVar(&followLocation, "location", false, "")
 	flag.BoolVar(&followLocation, "L", false, "")
-
-	// no path part
-	noPath := false
-	flag.BoolVar(&noPath, "nopath", false, "")
 
 	// method param
 	method := "GET"
@@ -118,7 +113,6 @@ func processArgs() config {
 		delay:          delay,
 		headers:        headers,
 		followLocation: followLocation,
-		noPath:         noPath,
 		method:         method,
 		saveStatus:     saveStatus,
 		timeout:        timeout,
@@ -142,7 +136,6 @@ func init() {
 		h += "  -d, --delay <millis>       Milliseconds between requests to the same host (defaut: 5000)\n"
 		h += "  -H, --header <header>      Send a custom HTTP header\n"
 		h += "  -L, --location             Follow redirects / location header\n"
-		h += "		--nopath			   Treat the hosts file as complete URLs\n"
 		h += "  -r, --rawhttp              Use the rawhttp library for requests (experimental)\n"
 		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
 		h += "  -t, --timeout <millis>     Set the HTTP timeout (default: 10000)\n"

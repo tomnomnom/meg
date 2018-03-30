@@ -27,17 +27,11 @@ func main() {
 	// get the config struct
 	c := processArgs()
 
-	// read the paths file; unless the nopath option is set
-	var paths []string
-	var err error
-	if c.noPath {
-		paths = []string{""}
-	} else {
-		paths, err = readLinesOrLiteral(c.paths, defaultPathsFile)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "failed to open paths file: %s\n", err)
-			os.Exit(1)
-		}
+	// read the paths file
+	paths, err := readLinesOrLiteral(c.paths, defaultPathsFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to open paths file: %s\n", err)
+		os.Exit(1)
 	}
 
 	// read the hosts file
