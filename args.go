@@ -107,12 +107,6 @@ func processArgs() config {
 		output = defaultOutputDir
 	}
 
-	// NASTY HACK ALERT
-	// If you're using the --nopath option then there's no paths file,
-	// so you can't specify a hosts file. Shift things along a bit, to fix it
-	output = hosts
-	hosts = paths
-
 	// set the requester function to use
 	requesterFn := goRequest
 	if rawHTTP {
