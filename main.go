@@ -84,7 +84,7 @@ func main() {
 	owg.Add(1)
 	go func() {
 		for res := range responses {
-			if c.saveStatus != 0 && c.saveStatus != res.statusCode {
+			if len(c.saveStatus) > 0 && !c.saveStatus.Includes(res.statusCode) {
 				continue
 			}
 

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 )
 
 // headerArgs is the type used to store the header arguments
@@ -18,13 +19,34 @@ func (h headerArgs) String() string {
 	return "string"
 }
 
+type saveStatusArgs []int
+
+func (s *saveStatusArgs) Set(val string) error {
+	i, _ := strconv.Atoi(val)
+	*s = append(*s, i)
+	return nil
+}
+
+func (s saveStatusArgs) String() string {
+	return "string"
+}
+
+func (s saveStatusArgs) Includes(search int) bool {
+	for _, status := range s {
+		if status == search {
+			return true
+		}
+	}
+	return false
+}
+
 type config struct {
 	concurrency    int
 	delay          int
 	headers        headerArgs
 	followLocation bool
 	method         string
-	saveStatus     int
+	saveStatus     saveStatusArgs
 	timeout        int
 	verbose        bool
 
@@ -47,7 +69,7 @@ func processArgs() config {
 	flag.IntVar(&delay, "delay", 5000, "")
 	flag.IntVar(&delay, "d", 5000, "")
 
-	// headers param
+	// headers params
 	var headers headerArgs
 	flag.Var(&headers, "header", "")
 	flag.Var(&headers, "H", "")
@@ -62,10 +84,10 @@ func processArgs() config {
 	flag.StringVar(&method, "method", "GET", "")
 	flag.StringVar(&method, "X", "GET", "")
 
-	// savestatus param
-	saveStatus := 0
-	flag.IntVar(&saveStatus, "savestatus", 0, "")
-	flag.IntVar(&saveStatus, "s", 0, "")
+	// savestatus params
+	var saveStatus saveStatusArgs
+	flag.Var(&saveStatus, "savestatus", "")
+	flag.Var(&saveStatus, "s", "")
 
 	// timeout param
 	timeout := 10000
