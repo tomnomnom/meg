@@ -50,9 +50,10 @@ type config struct {
 	timeout        int
 	verbose        bool
 
-	paths  string
-	hosts  string
-	output string
+	paths     string
+	hosts     string
+	output    string
+	noHeaders bool
 
 	requester requester
 }
@@ -99,6 +100,10 @@ func processArgs() config {
 	flag.BoolVar(&rawHTTP, "rawhttp", false, "")
 	flag.BoolVar(&rawHTTP, "r", false, "")
 
+	// no headers
+	noHeaders := false
+	flag.BoolVar(&noHeaders, "no-headers", false, "")
+
 	// verbose param
 	verbose := false
 	flag.BoolVar(&verbose, "verbose", false, "")
@@ -143,6 +148,7 @@ func processArgs() config {
 		paths:          paths,
 		hosts:          hosts,
 		output:         output,
+		noHeaders:      noHeaders,
 	}
 }
 

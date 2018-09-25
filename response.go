@@ -51,10 +51,22 @@ func (r response) String() string {
 	return b.String()
 }
 
+func (r response) StringNoHeaders() string {
+	b := &bytes.Buffer{}
+
+	b.Write(r.body)
+
+	return b.String()
+}
+
 // save write a request and response output to disk
-func (r response) save(pathPrefix string) (string, error) {
+func (r response) save(pathPrefix string, noHeaders bool) (string, error) {
 
 	content := []byte(r.String())
+	if noHeaders {
+		content = []byte(r.StringNoHeaders())
+	}
+
 	checksum := sha1.Sum(content)
 	parts := []string{pathPrefix}
 
