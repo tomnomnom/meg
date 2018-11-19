@@ -4,12 +4,20 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"strings"
+	"time"
 )
 
 var transport = &http.Transport{
-	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
+	DisableKeepAlives: true,
+	DialContext: (&net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: time.Second,
+		DualStack: true,
+	}).DialContext,
 }
 
 var httpClient = &http.Client{
