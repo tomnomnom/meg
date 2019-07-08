@@ -14,6 +14,8 @@ func rawRequest(r request) response {
 		return response{request: r, err: err}
 	}
 
+	req.Timeout = r.timeout
+
 	req.Path = r.path
 
 	r.headers = append(r.headers, "Connection: close")
