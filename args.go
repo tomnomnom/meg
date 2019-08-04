@@ -41,6 +41,7 @@ func (s saveStatusArgs) Includes(search int) bool {
 }
 
 type config struct {
+	body           string
 	concurrency    int
 	delay          int
 	headers        headerArgs
@@ -59,6 +60,11 @@ type config struct {
 }
 
 func processArgs() config {
+
+	// body param
+	body := ""
+	flag.StringVar(&body, "body", "", "")
+	flag.StringVar(&body, "b", "", "")
 
 	// concurrency param
 	concurrency := 20
@@ -136,6 +142,7 @@ func processArgs() config {
 	}
 
 	return config{
+		body:           body,
 		concurrency:    concurrency,
 		delay:          delay,
 		headers:        headers,
@@ -160,6 +167,7 @@ func init() {
 		h += "  meg [path|pathsFile] [hostsFile] [outputDir]\n\n"
 
 		h += "Options:\n"
+		h += "  -b, --body <val>           Set the request body\n"
 		h += "  -c, --concurrency <val>    Set the concurrency level (default: 20)\n"
 		h += "  -d, --delay <millis>       Milliseconds between requests to the same host (default: 5000)\n"
 		h += "  -H, --header <header>      Send a custom HTTP header\n"
