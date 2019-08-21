@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
@@ -33,7 +34,14 @@ func goRequest(r request) response {
 		}
 	}
 
-	req, err := http.NewRequest(r.method, r.URL(), nil)
+	var req *http.Request
+	var err error
+	if r.body != "" {
+		req, err = http.NewRequest(r.method, r.URL(), bytes.NewBuffer([]byte(r.body)))
+	} else {
+		req, err = http.NewRequest(r.method, r.URL(), nil)
+	}
+
 	if err != nil {
 		return response{request: r, err: err}
 	}

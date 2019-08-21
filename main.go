@@ -132,6 +132,7 @@ func main() {
 				path:           prefixedPath,
 				headers:        c.headers,
 				followLocation: c.followLocation,
+				body:           c.body,
 				timeout:        time.Duration(c.timeout * 1000000),
 			}
 		}

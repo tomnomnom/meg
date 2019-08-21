@@ -33,6 +33,14 @@ func rawRequest(r request) response {
 		req.AddHeader(h)
 	}
 
+	if r.body != "" {
+		req.Body = r.body
+	}
+
+	if !r.HasHeader("Content-Length") {
+		req.AutoSetContentLength()
+	}
+
 	resp, err := rawhttp.Do(req)
 	if err != nil {
 		return response{request: r, err: err}

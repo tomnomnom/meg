@@ -12,6 +12,7 @@ type request struct {
 	path    string
 	host    string
 	headers []string
+	body    string
 
 	followLocation bool
 	timeout        time.Duration
