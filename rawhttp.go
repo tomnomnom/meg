@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/tomnomnom/rawhttp"
 )
 
 func rawRequest(r request) response {
+	reqtime := time.Now()
 	req, err := rawhttp.FromURL(r.method, r.host)
 	if err != nil {
 		return response{request: r, err: err}
@@ -45,6 +47,7 @@ func rawRequest(r request) response {
 	if err != nil {
 		return response{request: r, err: err}
 	}
+	reqtimedone := time.Now().Sub(reqtime)
 
 	// Silly me. I should have done this in rawhttp
 	code, err := strconv.Atoi(resp.StatusCode())
@@ -61,6 +64,7 @@ func rawRequest(r request) response {
 
 	return response{
 		request:    r,
+		elapsed:    reqtimedone,
 		status:     status,
 		statusCode: code,
 		headers:    resp.Headers(),
