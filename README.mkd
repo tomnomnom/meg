@@ -132,7 +132,7 @@ meg's help output tries to actually be helpful:
 Request many paths for many hosts
 
 Usage:
-  meg [path|pathsFile] [hostsFile] [outputDir]
+  meg [options] [path|pathsFile] [hostsFile] [outputDir]
 
 Options:
   -c, --concurrency <val>    Set the concurrency level (defaut: 20)
@@ -160,6 +160,8 @@ Hosts file format:
 
 Examples:
   meg /robots.txt
+  meg -s 200 -X HEAD
+  meg -c 30 /
   meg hosts.txt paths.txt output
 ```
 
