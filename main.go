@@ -2,9 +2,11 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sync"
 	"time"
@@ -84,6 +86,7 @@ func main() {
 	owg.Add(1)
 	go func() {
 		for res := range responses {
+
 			if len(c.saveStatus) > 0 && !c.saveStatus.Includes(res.statusCode) {
 				continue
 			}
@@ -94,6 +97,25 @@ func main() {
 			}
 
 			path, err := res.save(c.output, c.noHeaders)
+			if len(c.saveGrep) > 0 {
+				var cmd *exec.Cmd
+				cmd = exec.Command("grep", "--color", c.saveGrep, path)
+				var out bytes.Buffer
+				cmd.Stdout = &out
+				cmd.Stderr = os.Stderr
+				cmd.Run()
+				strOut := out.String()
+				if len(strOut) == 0 {
+					err := os.Remove(path)
+
+					if err != nil {
+						  fmt.Println(err)
+							return
+					}
+					continue
+				}
+			}
+
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "failed to save file: %s\n", err)
 			}

@@ -142,6 +142,7 @@ Options:
   -s, --savestatus <status>  Save only responses with specific status code
   -v, --verbose              Verbose mode
   -X, --method <method>      HTTP method (default: GET)
+  -g, --saveGrep <string>    Save only if grep string in response
 
 Defaults:
   pathsFile: ./paths

@@ -47,6 +47,7 @@ type config struct {
 	headers        headerArgs
 	followLocation bool
 	method         string
+	saveGrep       string
 	saveStatus     saveStatusArgs
 	timeout        int
 	verbose        bool
@@ -90,6 +91,11 @@ func processArgs() config {
 	method := "GET"
 	flag.StringVar(&method, "method", "GET", "")
 	flag.StringVar(&method, "X", "GET", "")
+
+	// saveGrep param
+	saveGrep := ""
+	flag.StringVar(&saveGrep, "saveGrep", "", "")
+	flag.StringVar(&saveGrep, "g", "", "")
 
 	// savestatus params
 	var saveStatus saveStatusArgs
@@ -148,6 +154,7 @@ func processArgs() config {
 		headers:        headers,
 		followLocation: followLocation,
 		method:         method,
+		saveGrep:       saveGrep,
 		saveStatus:     saveStatus,
 		timeout:        timeout,
 		requester:      requesterFn,
@@ -177,6 +184,7 @@ func init() {
 		h += "  -t, --timeout <millis>     Set the HTTP timeout (default: 10000)\n"
 		h += "  -v, --verbose              Verbose mode\n"
 		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
+		h += "  -g, --saveGrep <string>    Save only if grep string in response\n\n"
 
 		h += "Defaults:\n"
 		h += "  pathsFile: ./paths\n"
