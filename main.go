@@ -97,9 +97,9 @@ func main() {
 			}
 
 			path, err := res.save(c.output, c.noHeaders)
-			if len(c.saveGrep) > 0 {
+			if len(c.savegf) > 0 {
 				var cmd *exec.Cmd
-				cmd = exec.Command("grep", "--color", c.saveGrep, path)
+				cmd = exec.Command("gf", c.savegf, path)
 				var out bytes.Buffer
 				cmd.Stdout = &out
 				cmd.Stderr = os.Stderr
