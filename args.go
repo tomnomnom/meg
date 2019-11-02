@@ -49,6 +49,7 @@ type config struct {
 	method         string
 	saveStatus     saveStatusArgs
 	timeout        int
+	prefix         string
 	verbose        bool
 
 	paths     string
@@ -115,6 +116,11 @@ func processArgs() config {
 	flag.BoolVar(&verbose, "verbose", false, "")
 	flag.BoolVar(&verbose, "v", false, "")
 
+	// prefix param
+	prefix := ""
+	flag.StringVar(&prefix, "prefix", "", "")
+	flag.StringVar(&prefix, "p", "", "")
+
 	flag.Parse()
 
 	// paths might be in a file, or it might be a single value
@@ -152,6 +158,7 @@ func processArgs() config {
 		timeout:        timeout,
 		requester:      requesterFn,
 		verbose:        verbose,
+		prefix:         prefix,
 		paths:          paths,
 		hosts:          hosts,
 		output:         output,
@@ -172,6 +179,7 @@ func init() {
 		h += "  -d, --delay <millis>       Milliseconds between requests to the same host (default: 5000)\n"
 		h += "  -H, --header <header>      Send a custom HTTP header\n"
 		h += "  -L, --location             Follow redirects / location header\n"
+		h += "  -p, --prefix               Add a prefix to each path\n"
 		h += "  -r, --rawhttp              Use the rawhttp library for requests (experimental)\n"
 		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
 		h += "  -t, --timeout <millis>     Set the HTTP timeout (default: 10000)\n"

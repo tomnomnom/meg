@@ -119,7 +119,7 @@ func main() {
 				fmt.Fprintf(os.Stderr, "failed to parse host: %s\n", err)
 				continue
 			}
-			prefixedPath := u.Path + path
+			prefixedPath := u.Path + c.prefix + path
 			u.Path = ""
 
 			// stripping off a path means we need to
