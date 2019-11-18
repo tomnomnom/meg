@@ -54,6 +54,7 @@ type config struct {
 	paths     string
 	hosts     string
 	output    string
+	regexignore string
 	noHeaders bool
 
 	requester requester
@@ -115,6 +116,12 @@ func processArgs() config {
 	flag.BoolVar(&verbose, "verbose", false, "")
 	flag.BoolVar(&verbose, "v", false, "")
 
+	regexignore := ""
+	flag.StringVar(&regexignore, "regexignore", "", "")
+	flag.StringVar(&regexignore, "x", "", "")
+
+
+
 	flag.Parse()
 
 	// paths might be in a file, or it might be a single value
@@ -156,6 +163,7 @@ func processArgs() config {
 		hosts:          hosts,
 		output:         output,
 		noHeaders:      noHeaders,
+		regexignore:	regexignore,
 	}
 }
 
@@ -176,7 +184,8 @@ func init() {
 		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
 		h += "  -t, --timeout <millis>     Set the HTTP timeout (default: 10000)\n"
 		h += "  -v, --verbose              Verbose mode\n"
-		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
+		h += "  -X, --method <method>      HTTP method (default: GET)\n"
+		h += "  -x, --regexignore <string>	Ignore results where the body matches a regex pattern\n\n"
 
 		h += "Defaults:\n"
 		h += "  pathsFile: ./paths\n"
