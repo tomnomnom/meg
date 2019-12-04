@@ -136,7 +136,7 @@ Usage:
 
 Options:
   -c, --concurrency <val>    Set the concurrency level (defaut: 20)
-  -d, --delay <val>          Milliseconds between requests to the same host (defaut: 5000)
+  -d, --delay <val>          Milliseconds between requests to the same host (default: 5000)
   -H, --header <header>      Send a custom HTTP header
   -r, --rawhttp              Use the rawhttp library for requests (experimental)
   -s, --savestatus <status>  Save only responses with specific status code
