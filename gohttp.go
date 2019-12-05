@@ -26,6 +26,9 @@ var httpClient = &http.Client{
 }
 
 func goRequest(r request) response {
+
+	reqtime := time.Now()
+
 	httpClient.Timeout = r.timeout
 
 	if !r.followLocation {
@@ -81,8 +84,10 @@ func goRequest(r request) response {
 			hs = append(hs, fmt.Sprintf("%s: %s", k, v))
 		}
 	}
+	reqtimedone := time.Now().Sub(reqtime)
 
 	return response{
+		elapsed:    reqtimedone,
 		request:    r,
 		status:     resp.Status,
 		statusCode: resp.StatusCode,
