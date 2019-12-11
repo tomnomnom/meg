@@ -41,6 +41,7 @@ func (s saveStatusArgs) Includes(search int) bool {
 }
 
 type config struct {
+	trackerLink    string
 	body           string
 	concurrency    int
 	delay          int
@@ -60,6 +61,9 @@ type config struct {
 }
 
 func processArgs() config {
+
+	trackerLink := ""
+	flag.StringVar(&trackerLink, "tracker", "", "")
 
 	// body param
 	body := ""
@@ -142,6 +146,7 @@ func processArgs() config {
 	}
 
 	return config{
+		trackerLink:    trackerLink,
 		body:           body,
 		concurrency:    concurrency,
 		delay:          delay,
