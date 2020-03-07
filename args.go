@@ -50,6 +50,7 @@ type config struct {
 	saveStatus     saveStatusArgs
 	timeout        int
 	verbose        bool
+	jsonOut		   bool
 
 	paths     string
 	hosts     string
@@ -106,6 +107,11 @@ func processArgs() config {
 	flag.BoolVar(&rawHTTP, "rawhttp", false, "")
 	flag.BoolVar(&rawHTTP, "r", false, "")
 
+	// Json Output param
+	jsonOut := false
+	flag.BoolVar(&jsonOut, "jsonOut", false, "")
+	flag.BoolVar(&jsonOut, "j", false, "")
+
 	// no headers
 	noHeaders := false
 	flag.BoolVar(&noHeaders, "no-headers", false, "")
@@ -156,6 +162,7 @@ func processArgs() config {
 		hosts:          hosts,
 		output:         output,
 		noHeaders:      noHeaders,
+		jsonOut:		jsonOut,
 	}
 }
 
@@ -176,7 +183,9 @@ func init() {
 		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
 		h += "  -t, --timeout <millis>     Set the HTTP timeout (default: 10000)\n"
 		h += "  -v, --verbose              Verbose mode\n"
-		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
+		h += "  -X, --method <method>      HTTP method (default: GET)\n"
+		h += "      --no-header            Don't output headers\n"
+		h += "  -j, --jsonOut              Output in JSON\n\n"
 
 		h += "Defaults:\n"
 		h += "  pathsFile: ./paths\n"
