@@ -142,6 +142,7 @@ Options:
   -s, --savestatus <status>  Save only responses with specific status code
   -v, --verbose              Verbose mode
   -X, --method <method>      HTTP method (default: GET)
+  -t, --timeout              Timeout per request in milliseconds
 
 Defaults:
   pathsFile: ./paths
