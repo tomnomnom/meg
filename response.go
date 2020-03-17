@@ -64,12 +64,13 @@ func (r response) jsonString(noHeaders bool) string {
 	if !noHeaders {
 		// Fill the request header struct
 		for _, h := range r.request.headers {
-			x := strings.Split(h, ":")
+			// We use SplitN because then we only split on the first colon occurrence
+			x := strings.SplitN(h, ":", 2)
 			jsonRequestHeaders = append(jsonRequestHeaders, JsonHeader{x[0], strings.TrimSpace(x[1])})
 		}
 		// Fill the response header struct
 		for _, h := range r.headers {
-			x := strings.Split(h, ":")
+			x := strings.SplitN(h, ":", 2)
 			jsonResponseHeaders = append(jsonResponseHeaders, JsonHeader{x[0], strings.TrimSpace(x[1])})
 		}
 	}
