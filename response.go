@@ -3,11 +3,11 @@ package main
 import (
 	"bytes"
 	"crypto/sha1"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
-	"encoding/json"
 	"strings"
 )
 
@@ -23,89 +23,64 @@ type response struct {
 	err        error
 }
 
-// String returns a string representation of the request and response
+// jsonString returns a JSON string representation of the request and response
 func (r response) jsonString(noHeaders bool) string {
-	if noHeaders{
-		// Falsch TODO
-		b := &bytes.Buffer{}
-		b.Write(r.body)
-		return b.String()
-	}
+	// Building the structs for the various JSON elements (root element, headers, body, ...)
 
-	b := &bytes.Buffer{}
-
-	b.WriteString(r.request.URL())
-	b.WriteString("\n\n")
-
-	b.WriteString(fmt.Sprintf("%s %s HTTP/1.1\n", r.request.method, r.request.path))
-
-	// request headers
-	for _, h := range r.request.headers {
-		b.WriteString(fmt.Sprintf("%s\n", h))
-	}
-	b.WriteString("\n")
-
-	// status line
-	b.WriteString(fmt.Sprintf("HTTP/1.1 %s\n", r.status))
-
-	// response headers
-	for _, h := range r.headers {
-		b.WriteString(fmt.Sprintf("%s\n", h))
-	}
-	b.WriteString("\n")
-
-	// body
-	/*
-	r.headers
-	r.status
-	r.err
-	*/
-	type JsonHeader struct{
-		JsonHeaderKey string `json:"headerkey"`
+	// Struct for Headers (Key, Value)
+	type JsonHeader struct {
+		JsonHeaderKey   string `json:"headerkey"`
 		JsonHeaderValue string `json:"headervalue"`
 	}
+	// Struct representing the request (URL, Hostname, HTTP Method, Path, Host, Headers (struct), Body, Follow (-L))
 	type JsonRequest struct {
-		JsonRequestUrl string `json:"url"`
-		JsonRequestHostname string `json:"hostname"`
-		JsonRequestMethod string `json:"method"`
-		JsonRequestPath    string `json:"path"`
-		JsonRequestHost    string `json:"host"`
-		JsonRequestHeaders    []JsonHeader `json:"headers"`
-		JsonRequestBody    string `json:"body"`
-		JsonRequestFollow    bool `json:"follow"`
+		JsonRequestUrl      string       `json:"url"`
+		JsonRequestHostname string       `json:"hostname"`
+		JsonRequestMethod   string       `json:"method"`
+		JsonRequestPath     string       `json:"path"`
+		JsonRequestHost     string       `json:"host"`
+		JsonRequestHeaders  []JsonHeader `json:"headers"`
+		JsonRequestBody     string       `json:"body"`
+		JsonRequestFollow   bool         `json:"follow"`
 	}
-	r.request.Hostname()
+	// Struct representing the response (HTTP status code, status text, headers(struct), body)
 	type JsonResponse struct {
-		JsonResponseStatusCode    int `json:"statuscode"`
-		JsonResponseStatus    string `json:"status"`
-		JsonResponseHeader    []JsonHeader `json:"headers"`
-		JsonBody    string `json:"body"`
+		JsonResponseStatusCode int          `json:"statuscode"`
+		JsonResponseStatus     string       `json:"status"`
+		JsonResponseHeader     []JsonHeader `json:"headers"`
+		JsonBody               string       `json:"body"`
 	}
+	// Struct representing the root element (Request, Response)
 	type JsonOut struct {
-		JsonRequest JsonRequest `json:"request"`
+		JsonRequest  JsonRequest  `json:"request"`
 		JsonResponse JsonResponse `json:"response"`
 	}
+
+	// Prepare the Header structs which will be inserted into the JSON element
 	var jsonRequestHeaders []JsonHeader
-	for _, h := range r.request.headers {
-		x := strings.Split(h, ":")
-		jsonRequestHeaders = append(jsonRequestHeaders, JsonHeader{x[0], strings.TrimSpace(x[1])})
-	}
 	var jsonResponseHeaders []JsonHeader
-	for _, h := range r.headers {
-		x := strings.Split(h, ":")
-		jsonResponseHeaders = append(jsonResponseHeaders, JsonHeader{x[0], strings.TrimSpace(x[1])})
+	// If we specify --no-headers we will simply receive "headers":null in both the request and response
+	// Otherwise we will extract the headers from the request/response and fill the header elements
+	if !noHeaders {
+		// Fill the request header struct
+		for _, h := range r.request.headers {
+			x := strings.Split(h, ":")
+			jsonRequestHeaders = append(jsonRequestHeaders, JsonHeader{x[0], strings.TrimSpace(x[1])})
+		}
+		// Fill the response header struct
+		for _, h := range r.headers {
+			x := strings.Split(h, ":")
+			jsonResponseHeaders = append(jsonResponseHeaders, JsonHeader{x[0], strings.TrimSpace(x[1])})
+		}
 	}
-	//r.h
-	//	var jsonRequestHeader []JsonHeader
-	//	for _, h := range r.request.headers {
-	//		x := strings.Split(h, ":")
-	//		jsonRequestHeader = append(jsonRequestHeader, JsonHeader{x[0], strings.TrimSpace(x[1])})
-	//	}
-	//	//r.headers
-	x := &bytes.Buffer{}
-	x.Write(r.body)
-	x.String()
+	// Create the JSON Body element
+	jsonBody := &bytes.Buffer{}
+	jsonBody.Write(r.body)
+
+	// Create the JSON element
+	// Root Element
 	resp := JsonOut{
+		// Request Element
 		JsonRequest{
 			r.request.URL(),
 			r.request.Hostname(),
@@ -115,25 +90,27 @@ func (r response) jsonString(noHeaders bool) string {
 			jsonRequestHeaders,
 			r.request.body,
 			r.request.followLocation,
-			},
-			JsonResponse{
-				r.statusCode,
-				r.status,
-				jsonResponseHeaders,
-				x.String(),
-			},
+		},
+		// Response Element
+		JsonResponse{
+			r.statusCode,
+			r.status,
+			jsonResponseHeaders,
+			jsonBody.String(),
+		},
 	}
+	// Marshal the JSON struct
 	ba, err := json.Marshal(resp)
 	if err != nil {
 		fmt.Println("error:", err)
 	}
-	fmt.Printf("%s", ba)
-	return b.String()
+
+	return string(ba)
 }
 
-// String returns a string representation of the request and response
+// megString returns a string representation of the request and response in a "traditional" meg format
 func (r response) megString(noHeaders bool) string {
-	if noHeaders{
+	if noHeaders {
 		b := &bytes.Buffer{}
 		b.Write(r.body)
 		return b.String()
@@ -167,21 +144,17 @@ func (r response) megString(noHeaders bool) string {
 	return b.String()
 }
 
-
 // save write a request and response output to disk
 func (r response) save(pathPrefix string, noHeaders bool, json bool) (string, error) {
 	var content []byte
 
-	if json{
+	// Depending if we want to save a json or meg string we call the corresponding String method
+	if json {
 		content = []byte(r.jsonString(noHeaders))
-	}else{
+	} else {
 		content = []byte(r.megString(noHeaders))
 	}
-/*
-	if noHeaders {
-		content = []byte(r.StringNoHeaders())
-	}
-*/
+
 	checksum := sha1.Sum(content)
 	parts := []string{pathPrefix}
 
