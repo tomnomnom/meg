@@ -244,3 +244,17 @@ out/example.com/61ac5fbb9d3dd054006ae82630b045ba730d8618:3:> TRACE /robots.txt H
 out/example.com/bd8d9f4c470ffa0e6ec8cfa8ba1c51d62289b6dd:3:> TRACE /.well-known/security.txt HTTP/1.1
 ...
 ```
+
+### JSON Output
+
+Instead of the usual meg output it is also possible to output the results
+as a JSON string with the `-j` or `--jsonOut` option:
+
+```
+▶ meg --jsonOut
+{"request":{"url":"","hostname":"","method":"","path":"","host":"","headers":[{"headerkey":"","headervalue":""},{"headerkey":"","headervalue":""}],"body":"","follow":false},"response":{"statuscode":,"status":"","headers":[{"headerkey":"","headervalue":""}],"body":""}}
+```
+
+### No headers
+
+With --no-headers you suppress the output of HTTP headers.

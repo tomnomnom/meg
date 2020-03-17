@@ -93,7 +93,7 @@ func main() {
 				continue
 			}
 
-			path, err := res.save(c.output, c.noHeaders)
+			path, err := res.save(c.output, c.noHeaders, c.jsonOut)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "failed to save file: %s\n", err)
 			}
