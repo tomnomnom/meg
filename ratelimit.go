@@ -3,6 +3,8 @@ package main
 import (
 	"sync"
 	"time"
+
+	"github.com/adamdrake/tokenbucket"
 )
 
 // a rateLimiter allows you to delay operations
@@ -11,7 +13,7 @@ import (
 type rateLimiter struct {
 	sync.Mutex
 	delay time.Duration
-	ops   map[string]time.Time
+	ops   map[string]*tokenbucket.TokenBucket
 }
 
 // newRateLimiter returns a new *rateLimiter for the
@@ -19,40 +21,32 @@ type rateLimiter struct {
 func newRateLimiter(delay time.Duration) *rateLimiter {
 	return &rateLimiter{
 		delay: delay,
-		ops:   make(map[string]time.Time),
+		ops:   make(map[string]*tokenbucket.TokenBucket),
 	}
 }
 
 // Block blocks until an operation for key is
 // allowed to proceed
 func (r *rateLimiter) Block(key string) {
-	now := time.Now()
-
 	r.Lock()
+	defer r.Unlock()
 
 	// if there's nothing in the map we can
+	// initialize the new rate limiter and
 	// return straight away
 	if _, ok := r.ops[key]; !ok {
-		r.ops[key] = now
-		r.Unlock()
+		r.ops[key] = tokenbucket.New(1, 1, r.delay)
 		return
 	}
 
 	// if time is up we can return straight away
-	t := r.ops[key]
-	deadline := t.Add(r.delay)
-	if now.After(deadline) {
-		r.ops[key] = now
-		r.Unlock()
+	if r.ops[key].Take() {
 		return
 	}
 
-	remaining := deadline.Sub(now)
-
-	// Set the time of the operation
-	r.ops[key] = now.Add(remaining)
-	r.Unlock()
-
-	// Block for the remaining time
-	<-time.After(remaining)
+	// otherwise, be sure we wait for a new token to be available,
+	// take it, and then return
+	time.Sleep(r.delay)
+	r.ops[key].Take()
+	return
 }
