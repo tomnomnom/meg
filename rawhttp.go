@@ -65,6 +65,7 @@ func rawRequest(r request) response {
 		statusCode: code,
 		headers:    resp.Headers(),
 		body:       resp.Body(),
+		duration:   resp.Duration,
 	}
 
 }
