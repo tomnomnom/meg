@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"time"
 )
 
 // a response is a wrapper around an HTTP response;
@@ -19,6 +20,7 @@ type response struct {
 	headers    []string
 	body       []byte
 	err        error
+	duration   time.Duration
 }
 
 // String returns a string representation of the request and response
@@ -26,6 +28,7 @@ func (r response) String() string {
 	b := &bytes.Buffer{}
 
 	b.WriteString(r.request.URL())
+	b.WriteString(fmt.Sprintf(" (duration: %d ms)", r.duration.Milliseconds()))
 	b.WriteString("\n\n")
 
 	b.WriteString(fmt.Sprintf("> %s %s HTTP/1.1\n", r.request.method, r.request.path))
