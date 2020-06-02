@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
+	"strings"
 )
 
 const (
@@ -88,6 +89,10 @@ func main() {
 				continue
 			}
 
+			if c.saveHeader != "" && !res.hasHeader(c.saveHeader) {
+				continue
+			}
+
 			if res.err != nil {
 				fmt.Fprintf(os.Stderr, "request failed: %s\n", res.err)
 				continue
@@ -115,10 +120,16 @@ func main() {
 			// so we should strip that off and add it to
 			// the beginning of the path.
 			u, err := url.Parse(host)
+
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "failed to parse host: %s\n", err)
 				continue
 			}
+
+			if len(c.trackerLink) > 0 {
+				path = replaceTracker(path, u.Host, c.trackerLink)
+			}
+
 			prefixedPath := u.Path + path
 			u.Path = ""
 
@@ -136,7 +147,7 @@ func main() {
 				timeout:        time.Duration(c.timeout * 1000000),
 			}
 		}
-	}
+	} 
 
 	// once all of the requests have been sent we can
 	// close the requests channel
@@ -167,6 +178,19 @@ func readLines(filename string) ([]string, error) {
 	}
 
 	return lines, sc.Err()
+}
+
+func replaceTracker(path string, host string, trackerLink string) string {
+	now := time.Now()
+	seconds := now.Unix()
+
+	host = strings.Split(host, ":")[0]
+
+	tracker := fmt.Sprintf("%d.%s.%s", seconds, host, trackerLink)
+
+	newPath := strings.Replace(path, "{tracker}", tracker, -1)
+
+	return newPath
 }
 
 // readLinesOrLiteral tries to read lines from a file, returning
