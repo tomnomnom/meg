@@ -89,6 +89,10 @@ func main() {
 				continue
 			}
 
+			if c.saveHeader != "" && !res.hasHeader(c.saveHeader) {
+				continue
+			}
+
 			if res.err != nil {
 				fmt.Fprintf(os.Stderr, "request failed: %s\n", res.err)
 				continue

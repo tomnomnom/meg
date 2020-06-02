@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 )
 
 // a response is a wrapper around an HTTP response;
@@ -88,4 +89,13 @@ func (r response) save(pathPrefix string, noHeaders bool) (string, error) {
 	}
 
 	return p, nil
+}
+
+func (r response) hasHeader(header string) bool {
+	for _, item := range r.headers {
+		if strings.TrimSpace(item) == header {
+			return true
+		}
+	}
+	return false
 }
