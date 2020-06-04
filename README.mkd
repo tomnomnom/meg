@@ -132,14 +132,17 @@ meg's help output tries to actually be helpful:
 Request many paths for many hosts
 
 Usage:
-  meg [options] [path|pathsFile] [hostsFile] [outputDir]
+  meg [options] [path|pathsFile] [host|hostsFile] [outputDir]
 
 Options:
-  -c, --concurrency <val>    Set the concurrency level (defaut: 20)
-  -d, --delay <val>          Milliseconds between requests to the same host (default: 5000)
+  -b, --body <val>           Set the request body
+  -c, --concurrency <val>    Set the concurrency level (default: 20)
+  -d, --delay <millis>       Milliseconds between requests to the same host (default: 5000)
   -H, --header <header>      Send a custom HTTP header
+  -L, --location             Follow redirects / location header
   -r, --rawhttp              Use the rawhttp library for requests (experimental)
   -s, --savestatus <status>  Save only responses with specific status code
+  -t, --timeout <millis>     Set the HTTP timeout (default: 10000)
   -v, --verbose              Verbose mode
   -X, --method <method>      HTTP method (default: GET)
 
@@ -162,7 +165,7 @@ Examples:
   meg /robots.txt
   meg -s 200 -X HEAD
   meg -c 30 /
-  meg hosts.txt paths.txt output
+  meg paths.txt hosts.txt output
 ```
 
 ### Concurrency
