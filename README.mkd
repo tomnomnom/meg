@@ -140,6 +140,7 @@ Options:
   -H, --header <header>      Send a custom HTTP header
   -r, --rawhttp              Use the rawhttp library for requests (experimental)
   -s, --savestatus <status>  Save only responses with specific status code
+  -sr, --saveresp <string>   Save only responses containing specific string
   -v, --verbose              Verbose mode
   -X, --method <method>      HTTP method (default: GET)
 
@@ -231,6 +232,15 @@ use the `-s` or `--savestatus` option:
 
 ```
 ▶ meg --savestatus 200 /robots.txt
+```
+
+### Saving Only Certain Response Strings
+
+If you only want to save results that contained a certain string, you can
+use the `-sr` or `--saveresp` option:
+
+```
+▶ meg --saveresp '": "v1"' /robots.txt
 ```
 
 ### Specifying The Method

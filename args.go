@@ -48,6 +48,7 @@ type config struct {
 	followLocation bool
 	method         string
 	saveStatus     saveStatusArgs
+	saveResp       string
 	timeout        int
 	verbose        bool
 
@@ -95,6 +96,11 @@ func processArgs() config {
 	var saveStatus saveStatusArgs
 	flag.Var(&saveStatus, "savestatus", "")
 	flag.Var(&saveStatus, "s", "")
+
+	// saveResp params
+	saveResp := ""
+	flag.StringVar(&saveResp, "saveResp", "", "")
+	flag.StringVar(&saveResp, "sr", "", "")
 
 	// timeout param
 	timeout := 10000
@@ -149,6 +155,7 @@ func processArgs() config {
 		followLocation: followLocation,
 		method:         method,
 		saveStatus:     saveStatus,
+		saveResp:       saveResp,
 		timeout:        timeout,
 		requester:      requesterFn,
 		verbose:        verbose,
@@ -167,16 +174,17 @@ func init() {
 		h += "  meg [path|pathsFile] [hostsFile] [outputDir]\n\n"
 
 		h += "Options:\n"
-		h += "  -b, --body <val>           Set the request body\n"
-		h += "  -c, --concurrency <val>    Set the concurrency level (default: 20)\n"
-		h += "  -d, --delay <millis>       Milliseconds between requests to the same host (default: 5000)\n"
-		h += "  -H, --header <header>      Send a custom HTTP header\n"
-		h += "  -L, --location             Follow redirects / location header\n"
-		h += "  -r, --rawhttp              Use the rawhttp library for requests (experimental)\n"
-		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
-		h += "  -t, --timeout <millis>     Set the HTTP timeout (default: 10000)\n"
-		h += "  -v, --verbose              Verbose mode\n"
-		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
+		h += "  -b,  --body <val>           Set the request body\n"
+		h += "  -c,  --concurrency <val>    Set the concurrency level (default: 20)\n"
+		h += "  -d,  --delay <millis>       Milliseconds between requests to the same host (default: 5000)\n"
+		h += "  -H,  --header <header>      Send a custom HTTP header\n"
+		h += "  -L,  --location             Follow redirects / location header\n"
+		h += "  -r,  --rawhttp              Use the rawhttp library for requests (experimental)\n"
+		h += "  -s,  --savestatus <status>  Save only responses with specific status code\n"
+		h += "  -sr, --saveresp <string>   Save only responses containing specific string\n"
+		h += "  -t,  --timeout <millis>     Set the HTTP timeout (default: 10000)\n"
+		h += "  -v,  --verbose              Verbose mode\n"
+		h += "  -X,  --method <method>      HTTP method (default: GET)\n\n"
 
 		h += "Defaults:\n"
 		h += "  pathsFile: ./paths\n"

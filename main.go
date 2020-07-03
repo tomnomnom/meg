@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
@@ -85,6 +86,10 @@ func main() {
 	go func() {
 		for res := range responses {
 			if len(c.saveStatus) > 0 && !c.saveStatus.Includes(res.statusCode) {
+				continue
+			}
+
+			if len(c.saveResp) > 0 && !(strings.Contains(strings.Join(res.headers, ""), c.saveResp) || (strings.Contains(string(res.body), c.saveResp))) {
 				continue
 			}
 
