@@ -137,9 +137,11 @@ Usage:
 Options:
   -c, --concurrency <val>    Set the concurrency level (defaut: 20)
   -d, --delay <val>          Milliseconds between requests to the same host (default: 5000)
+  -dr, --discresp <string>   Discard responses containing specific string
   -H, --header <header>      Send a custom HTTP header
   -r, --rawhttp              Use the rawhttp library for requests (experimental)
   -s, --savestatus <status>  Save only responses with specific status code
+  -sr, --saveresp <string>   Save only responses containing specific string
   -v, --verbose              Verbose mode
   -X, --method <method>      HTTP method (default: GET)
 
@@ -231,6 +233,24 @@ use the `-s` or `--savestatus` option:
 
 ```
 ▶ meg --savestatus 200 /robots.txt
+```
+
+### Saving Only Certain Response Strings
+
+If you only want to save results that contained a certain string, you can
+use the `-sr` or `--saveresp` option:
+
+```
+▶ meg --saveresp '": "v1"' /robots.txt
+```
+
+### Discarding Certain Response Strings
+
+Alternatively, if you don't want to save results that contained a certain string, you can
+use the `-dr` or `--discresp` option:
+
+```
+▶ meg --discresp '": "v1"' /robots.txt
 ```
 
 ### Specifying The Method
