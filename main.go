@@ -93,6 +93,10 @@ func main() {
 				continue
 			}
 
+			if len(c.discResp) > 0 && (strings.Contains(strings.Join(res.headers, ""), c.discResp) || (strings.Contains(string(res.body), c.discResp))) {
+				continue
+			}
+
 			if res.err != nil {
 				fmt.Fprintf(os.Stderr, "request failed: %s\n", res.err)
 				continue
