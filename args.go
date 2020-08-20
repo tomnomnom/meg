@@ -100,6 +100,14 @@ func processArgs() config {
 	flag.StringVar(&method, "method", "GET", "")
 	flag.StringVar(&method, "X", "GET", "")
 
+	regexignore := ""
+	flag.StringVar(&regexignore, "regexignore", "", "")
+	flag.StringVar(&regexignore, "ri", "", "")
+
+	regexkeep := ""
+	flag.StringVar(&regexkeep, "regexkeep", "", "")
+	flag.StringVar(&regexkeep, "rk", "", "")
+
 	// savestatus params
 	var saveStatus saveStatusArgs
 	flag.Var(&saveStatus, "savestatus", "")
@@ -128,10 +136,6 @@ func processArgs() config {
 	verbose := false
 	flag.BoolVar(&verbose, "verbose", false, "")
 	flag.BoolVar(&verbose, "v", false, "")
-
-	regexignore := ""
-	flag.StringVar(&regexignore, "regexignore", "", "")
-	flag.StringVar(&regexignore, "ri", "", "")
 
 
 
