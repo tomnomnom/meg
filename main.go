@@ -6,10 +6,10 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
-	"regexp"
 )
 
 const (
@@ -102,7 +102,7 @@ func main() {
 				fmt.Fprintf(os.Stderr, "request failed: %s\n", res.err)
 				continue
 			}
-			
+
 			path, err := res.save(c.output, c.noHeaders)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "failed to save file: %s\n", err)
@@ -115,7 +115,7 @@ func main() {
 			}
 
 			if len(c.regexIgnore) > 0 {
-				matched, _ := regexp.MatchString(c.regexIgnore,res.String())
+				matched, _ := regexp.MatchString(c.regexIgnore, res.String())
 
 				if matched {
 					continue
@@ -123,7 +123,7 @@ func main() {
 			}
 
 			if len(c.regexKeep) > 0 {
-				matched, _ := regexp.MatchString(c.regexKeep,res.String())
+				matched, _ := regexp.MatchString(c.regexKeep, res.String())
 
 				if !matched {
 					continue

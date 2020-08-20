@@ -139,8 +139,6 @@ func processArgs() config {
 	flag.BoolVar(&verbose, "verbose", false, "")
 	flag.BoolVar(&verbose, "v", false, "")
 
-
-
 	flag.Parse()
 
 	// paths might be in a file, or it might be a single value
