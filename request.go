@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 	"time"
@@ -49,4 +50,20 @@ func (r request) HasHeader(h string) bool {
 		}
 	}
 	return false
+}
+
+func (r request) GetHeader(h string) string {
+	var header string
+	norm := func(s string) string {
+		return strings.ToLower(strings.TrimSpace(s))
+	}
+	for _, candidate := range r.headers {
+
+		p := strings.SplitN(candidate, ":", 2)
+		if norm(p[0]) == norm(h) {
+			header := fmt.Sprintf("%s", norm(p[1]))
+			return header
+		}
+	}
+	return header
 }
