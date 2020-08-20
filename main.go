@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
+	"regexp"
 )
 
 const (
@@ -93,6 +94,14 @@ func main() {
 				continue
 			}
 
+			if c.regexignore != "" {
+				matched, _ := regexp.MatchString(c.regexignore,res.String())
+
+				if matched {  
+					continue
+				}
+			}
+			
 			path, err := res.save(c.output, c.noHeaders)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "failed to save file: %s\n", err)
