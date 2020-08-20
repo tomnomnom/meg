@@ -102,22 +102,6 @@ func main() {
 				fmt.Fprintf(os.Stderr, "request failed: %s\n", res.err)
 				continue
 			}
-
-			if len(c.regexignore) > 0 {
-				matched, _ := regexp.MatchString(c.regexignore,res.String())
-
-				if matched {
-					continue
-				}
-			}
-
-			if len(c.regexkeep) > 0 {
-				matched, _ := regexp.MatchString(c.regexkeep,res.String())
-
-				if !matched {  
-					continue
-				}
-			}
 			
 			path, err := res.save(c.output, c.noHeaders)
 			if err != nil {
@@ -128,6 +112,22 @@ func main() {
 			fmt.Fprintf(index, "%s", line)
 			if c.verbose {
 				fmt.Printf("%s", line)
+			}
+
+			if len(c.regexIgnore) > 0 {
+				matched, _ := regexp.MatchString(c.regexIgnore,res.String())
+
+				if matched {
+					continue
+				}
+			}
+
+			if len(c.regexKeep) > 0 {
+				matched, _ := regexp.MatchString(c.regexKeep,res.String())
+
+				if !matched {
+					continue
+				}
 			}
 		}
 		owg.Done()

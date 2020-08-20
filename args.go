@@ -48,10 +48,10 @@ type config struct {
 	headers        headerArgs
 	followLocation bool
 	method         string
-	regexignore    string
-	regexkeep      string
-	saveStatus     saveStatusArgs
+	regexIgnore    string
+	regexKeep      string
 	saveResp       string
+	saveStatus     saveStatusArgs
 	timeout        int
 	verbose        bool
 
@@ -100,23 +100,25 @@ func processArgs() config {
 	flag.StringVar(&method, "method", "GET", "")
 	flag.StringVar(&method, "X", "GET", "")
 
-	regexignore := ""
-	flag.StringVar(&regexignore, "regexignore", "", "")
-	flag.StringVar(&regexignore, "ri", "", "")
+	// regexIgnore params
+	regexIgnore := ""
+	flag.StringVar(&regexIgnore, "regexIgnore", "", "")
+	flag.StringVar(&regexIgnore, "ri", "", "")
 
-	regexkeep := ""
-	flag.StringVar(&regexkeep, "regexkeep", "", "")
-	flag.StringVar(&regexkeep, "rk", "", "")
-
-	// savestatus params
-	var saveStatus saveStatusArgs
-	flag.Var(&saveStatus, "savestatus", "")
-	flag.Var(&saveStatus, "s", "")
+	// regexKeep params
+	regexKeep := ""
+	flag.StringVar(&regexKeep, "regexKeep", "", "")
+	flag.StringVar(&regexKeep, "rk", "", "")
 
 	// saveResp params
 	saveResp := ""
 	flag.StringVar(&saveResp, "saveresp", "", "")
 	flag.StringVar(&saveResp, "sr", "", "")
+
+	// savestatus params
+	var saveStatus saveStatusArgs
+	flag.Var(&saveStatus, "savestatus", "")
+	flag.Var(&saveStatus, "s", "")
 
 	// timeout param
 	timeout := 10000
@@ -173,10 +175,10 @@ func processArgs() config {
 		headers:        headers,
 		followLocation: followLocation,
 		method:         method,
-		regexignore:    regexignore,
-		regexkeep:      regexkeep,
-		saveStatus:     saveStatus,
+		regexIgnore:    regexIgnore,
+		regexKeep:      regexKeep,
 		saveResp:       saveResp,
+		saveStatus:     saveStatus,
 		timeout:        timeout,
 		requester:      requesterFn,
 		verbose:        verbose,
@@ -204,12 +206,11 @@ func init() {
 		h += "  -r,  --rawhttp              Use the rawhttp library for requests (experimental)\n"
 		h += "  -ri, --regexignore <string> Ignore results where the body matches a regex pattern\n\n"
 		h += "  -rk, --regexkeep <string>   Keep results where the body matches a regex pattern\n\n"
-		h += "  -s,  --savestatus <status>  Save only responses with specific status code\n"
 		h += "  -sr, --saveresp <string>    Save only responses containing specific string\n"
+		h += "  -s,  --savestatus <status>  Save only responses with specific status code\n"
 		h += "  -t,  --timeout <millis>     Set the HTTP timeout (default: 10000)\n"
 		h += "  -v,  --verbose              Verbose mode\n"
 		h += "  -X,  --method <method>      HTTP method (default: GET)\n\n"
-		h += "  -x, --regexignore <string>	Ignore results where the body matches a regex pattern\n\n"
 
 		h += "Defaults:\n"
 		h += "  pathsFile: ./paths\n"
