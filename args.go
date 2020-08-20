@@ -105,8 +105,8 @@ func processArgs() config {
 	flag.StringVar(&regexignore, "ri", "", "")
 
 	regexkeep := ""
-	flag.StringVar(&regexkeep, "regexkeep", "")
-	flag.StringVar(&regexkeep, "rk", "")
+	flag.StringVar(&regexkeep, "regexkeep", "", "")
+	flag.StringVar(&regexkeep, "rk", "", "")
 
 	// savestatus params
 	var saveStatus saveStatusArgs
