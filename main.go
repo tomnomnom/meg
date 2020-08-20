@@ -114,7 +114,7 @@ func main() {
 			if len(c.regexkeep) > 0 {
 				matched, _ := regexp.MatchString(c.regexkeep,res.String())
 
-				if not matched {  
+				if !matched {  
 					continue
 				}
 			}
