@@ -48,6 +48,8 @@ type config struct {
 	headers        headerArgs
 	followLocation bool
 	method         string
+	regexignore    string
+	regexkeep      string
 	saveStatus     saveStatusArgs
 	saveResp       string
 	timeout        int
@@ -56,7 +58,6 @@ type config struct {
 	paths     string
 	hosts     string
 	output    string
-	regexignore string
 	noHeaders bool
 
 	requester requester
@@ -130,7 +131,7 @@ func processArgs() config {
 
 	regexignore := ""
 	flag.StringVar(&regexignore, "regexignore", "", "")
-	flag.StringVar(&regexignore, "x", "", "")
+	flag.StringVar(&regexignore, "ri", "", "")
 
 
 
@@ -168,6 +169,8 @@ func processArgs() config {
 		headers:        headers,
 		followLocation: followLocation,
 		method:         method,
+		regexignore:    regexignore,
+		regexkeep:      regexkeep,
 		saveStatus:     saveStatus,
 		saveResp:       saveResp,
 		timeout:        timeout,
@@ -177,7 +180,6 @@ func processArgs() config {
 		hosts:          hosts,
 		output:         output,
 		noHeaders:      noHeaders,
-		regexignore:	regexignore,
 	}
 }
 
@@ -196,6 +198,8 @@ func init() {
 		h += "  -H,  --header <header>      Send a custom HTTP header\n"
 		h += "  -L,  --location             Follow redirects / location header\n"
 		h += "  -r,  --rawhttp              Use the rawhttp library for requests (experimental)\n"
+		h += "  -ri, --regexignore <string> Ignore results where the body matches a regex pattern\n\n"
+		h += "  -rk, --regexkeep <string>   Keep results where the body matches a regex pattern\n\n"
 		h += "  -s,  --savestatus <status>  Save only responses with specific status code\n"
 		h += "  -sr, --saveresp <string>    Save only responses containing specific string\n"
 		h += "  -t,  --timeout <millis>     Set the HTTP timeout (default: 10000)\n"
