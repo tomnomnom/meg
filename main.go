@@ -103,10 +103,18 @@ func main() {
 				continue
 			}
 
-			if c.regexignore != "" {
+			if len(c.regexignore) > 0 {
 				matched, _ := regexp.MatchString(c.regexignore,res.String())
 
-				if matched {  
+				if matched {
+					continue
+				}
+			}
+
+			if len(c.regexkeep) > 0 {
+				matched, _ := regexp.MatchString(c.regexkeep,res.String())
+
+				if not matched {  
 					continue
 				}
 			}
