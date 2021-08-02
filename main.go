@@ -97,6 +97,21 @@ func main() {
 			if len(c.discResp) > 0 && (strings.Contains(strings.Join(res.headers, ""), c.discResp) || (strings.Contains(string(res.body), c.discResp))) {
 				continue
 			}
+			if len(c.regexIgnore) > 0 {
+				re := regexp.MustCompile(c.regexIgnore)
+				matched := re.MatchString(res.String())
+				if matched {
+					continue
+				}
+			}
+
+			if len(c.regexKeep) > 0 {
+				re := regexp.MustCompile(c.regexKeep)
+				matched := re.MatchString(res.String())
+				if !matched {
+					continue
+				}
+			}
 
 			if res.err != nil {
 				fmt.Fprintf(os.Stderr, "request failed: %s\n", res.err)
@@ -112,22 +127,6 @@ func main() {
 			fmt.Fprintf(index, "%s", line)
 			if c.verbose {
 				fmt.Printf("%s", line)
-			}
-
-			if len(c.regexIgnore) > 0 {
-				matched, _ := regexp.MatchString(c.regexIgnore, res.String())
-
-				if matched {
-					continue
-				}
-			}
-
-			if len(c.regexKeep) > 0 {
-				matched, _ := regexp.MatchString(c.regexKeep, res.String())
-
-				if !matched {
-					continue
-				}
 			}
 		}
 		owg.Done()
