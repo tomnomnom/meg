@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -95,6 +96,21 @@ func main() {
 
 			if len(c.discResp) > 0 && (strings.Contains(strings.Join(res.headers, ""), c.discResp) || (strings.Contains(string(res.body), c.discResp))) {
 				continue
+			}
+			if len(c.regexIgnore) > 0 {
+				re := regexp.MustCompile(c.regexIgnore)
+				matched := re.MatchString(res.String())
+				if matched {
+					continue
+				}
+			}
+
+			if len(c.regexKeep) > 0 {
+				re := regexp.MustCompile(c.regexKeep)
+				matched := re.MatchString(res.String())
+				if !matched {
+					continue
+				}
 			}
 
 			if res.err != nil {

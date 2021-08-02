@@ -48,8 +48,10 @@ type config struct {
 	headers        headerArgs
 	followLocation bool
 	method         string
-	saveStatus     saveStatusArgs
+	regexIgnore    string
+	regexKeep      string
 	saveResp       string
+	saveStatus     saveStatusArgs
 	timeout        int
 	verbose        bool
 
@@ -98,15 +100,25 @@ func processArgs() config {
 	flag.StringVar(&method, "method", "GET", "")
 	flag.StringVar(&method, "X", "GET", "")
 
-	// savestatus params
-	var saveStatus saveStatusArgs
-	flag.Var(&saveStatus, "savestatus", "")
-	flag.Var(&saveStatus, "s", "")
+	// regexIgnore params
+	regexIgnore := ""
+	flag.StringVar(&regexIgnore, "regexIgnore", "", "")
+	flag.StringVar(&regexIgnore, "ri", "", "")
+
+	// regexKeep params
+	regexKeep := ""
+	flag.StringVar(&regexKeep, "regexKeep", "", "")
+	flag.StringVar(&regexKeep, "rk", "", "")
 
 	// saveResp params
 	saveResp := ""
 	flag.StringVar(&saveResp, "saveresp", "", "")
 	flag.StringVar(&saveResp, "sr", "", "")
+
+	// savestatus params
+	var saveStatus saveStatusArgs
+	flag.Var(&saveStatus, "savestatus", "")
+	flag.Var(&saveStatus, "s", "")
 
 	// timeout param
 	timeout := 10000
@@ -161,8 +173,10 @@ func processArgs() config {
 		headers:        headers,
 		followLocation: followLocation,
 		method:         method,
-		saveStatus:     saveStatus,
+		regexIgnore:    regexIgnore,
+		regexKeep:      regexKeep,
 		saveResp:       saveResp,
+		saveStatus:     saveStatus,
 		timeout:        timeout,
 		requester:      requesterFn,
 		verbose:        verbose,
@@ -188,8 +202,10 @@ func init() {
 		h += "  -H,  --header <header>      Send a custom HTTP header\n"
 		h += "  -L,  --location             Follow redirects / location header\n"
 		h += "  -r,  --rawhttp              Use the rawhttp library for requests (experimental)\n"
-		h += "  -s,  --savestatus <status>  Save only responses with specific status code\n"
+		h += "  -ri, --regexignore <string> Ignore results where the body matches a regex pattern\n\n"
+		h += "  -rk, --regexkeep <string>   Keep results where the body matches a regex pattern\n\n"
 		h += "  -sr, --saveresp <string>    Save only responses containing specific string\n"
+		h += "  -s,  --savestatus <status>  Save only responses with specific status code\n"
 		h += "  -t,  --timeout <millis>     Set the HTTP timeout (default: 10000)\n"
 		h += "  -v,  --verbose              Verbose mode\n"
 		h += "  -X,  --method <method>      HTTP method (default: GET)\n\n"
