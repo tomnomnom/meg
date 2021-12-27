@@ -17,9 +17,6 @@ or later installed and configured you can install meg with `go get`:
 ▶ go get -u github.com/GwynHannay/meg
 ```
 
-Or [download a binary](https://github.com/GwynHannay/meg/releases) and
-put it somewhere in your `$PATH` (e.g. in `/usr/bin/`).
-
 ### Install Errors
 
 If you see an error like this it means your version of Go is too old:
