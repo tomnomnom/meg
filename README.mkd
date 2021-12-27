@@ -216,7 +216,7 @@ the Go HTTP client will fail:
 request failed: parse https://example.org/%%0a0afoo:bar: invalid URL escape "%%0"
 ```
 
-You can use the `-r` or `--rawhttp` flag to enable use of the [rawhttp](https://github.com/GwynHannay/rawhttp)
+You can use the `-r` or `--rawhttp` flag to enable use of the [rawhttp](https://github.com/tomnomnom/rawhttp)
 library, which does little to no validation on the request:
 
 ```
