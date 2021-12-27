@@ -5,7 +5,7 @@ meg is a tool for fetching lots of URLs but still being 'nice' to servers.
 It can be used to fetch many paths for many hosts; fetching one path
 for all hosts before moving on to the next path and repeating.
 
-You get lots of results quickly, but non of the individual hosts get
+You get lots of results quickly, but none of the individual hosts get
 flooded with traffic.
 
 ## Install
@@ -14,10 +14,10 @@ meg is written in Go and has no run-time dependencies. If you have Go 1.9
 or later installed and configured you can install meg with `go get`:
 
 ```
-▶ go get -u github.com/tomnomnom/meg
+▶ go get -u github.com/GwynHannay/meg
 ```
 
-Or [download a binary](https://github.com/tomnomnom/meg/releases) and
+Or [download a binary](https://github.com/GwynHannay/meg/releases) and
 put it somewhere in your `$PATH` (e.g. in `/usr/bin/`).
 
 ### Install Errors
@@ -25,12 +25,12 @@ put it somewhere in your `$PATH` (e.g. in `/usr/bin/`).
 If you see an error like this it means your version of Go is too old:
 
 ```
-# github.com/tomnomnom/rawhttp
-/root/go/src/github.com/tomnomnom/rawhttp/request.go:102: u.Hostname undefined (
+# github.com/GwynHannay/rawhttp
+/root/go/src/github.com/GwynHannay/rawhttp/request.go:102: u.Hostname undefined (
 type *url.URL has no field or method Hostname)
-/root/go/src/github.com/tomnomnom/rawhttp/request.go:103: u.Port undefined (type
+/root/go/src/github.com/GwynHannay/rawhttp/request.go:103: u.Port undefined (type
  *url.URL has no field or method Port)
- /root/go/src/github.com/tomnomnom/rawhttp/request.go:259: undefined: x509.System
+ /root/go/src/github.com/GwynHannay/rawhttp/request.go:259: undefined: x509.System
  CertPool
 ```
 
@@ -216,7 +216,7 @@ the Go HTTP client will fail:
 request failed: parse https://example.org/%%0a0afoo:bar: invalid URL escape "%%0"
 ```
 
-You can use the `-r` or `--rawhttp` flag to enable use of the [rawhttp](https://github.com/tomnomnom/rawhttp)
+You can use the `-r` or `--rawhttp` flag to enable use of the [rawhttp](https://github.com/GwynHannay/rawhttp)
 library, which does little to no validation on the request:
 
 ```
