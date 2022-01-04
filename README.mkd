@@ -1,6 +1,6 @@
 # meg
 
-meg is a tool for fetching lots of URLs but still being 'nice' to servers.
+Created by [Tom Hudson](https://github.com/tomnomnom) (original repo [here](https://github.com/tomnomnom/meg)), meg is a tool for fetching lots of URLs but still being 'nice' to servers.
 
 It can be used to fetch many paths for many hosts; fetching one path
 for all hosts before moving on to the next path and repeating.
