@@ -44,9 +44,13 @@ type config struct {
 	body           string
 	concurrency    int
 	delay          int
+	discResp       string
 	headers        headerArgs
 	followLocation bool
 	method         string
+	regexIgnore    string
+	regexKeep      string
+	saveResp       string
 	saveStatus     saveStatusArgs
 	timeout        int
 	verbose        bool
@@ -76,6 +80,11 @@ func processArgs() config {
 	flag.IntVar(&delay, "delay", 5000, "")
 	flag.IntVar(&delay, "d", 5000, "")
 
+	// discResp params
+	discResp := ""
+	flag.StringVar(&discResp, "discresp", "", "")
+	flag.StringVar(&discResp, "dr", "", "")
+
 	// headers params
 	var headers headerArgs
 	flag.Var(&headers, "header", "")
@@ -90,6 +99,21 @@ func processArgs() config {
 	method := "GET"
 	flag.StringVar(&method, "method", "GET", "")
 	flag.StringVar(&method, "X", "GET", "")
+
+	// regexIgnore params
+	regexIgnore := ""
+	flag.StringVar(&regexIgnore, "regexIgnore", "", "")
+	flag.StringVar(&regexIgnore, "ri", "", "")
+
+	// regexKeep params
+	regexKeep := ""
+	flag.StringVar(&regexKeep, "regexKeep", "", "")
+	flag.StringVar(&regexKeep, "rk", "", "")
+
+	// saveResp params
+	saveResp := ""
+	flag.StringVar(&saveResp, "saveresp", "", "")
+	flag.StringVar(&saveResp, "sr", "", "")
 
 	// savestatus params
 	var saveStatus saveStatusArgs
@@ -145,9 +169,13 @@ func processArgs() config {
 		body:           body,
 		concurrency:    concurrency,
 		delay:          delay,
+		discResp:       discResp,
 		headers:        headers,
 		followLocation: followLocation,
 		method:         method,
+		regexIgnore:    regexIgnore,
+		regexKeep:      regexKeep,
+		saveResp:       saveResp,
 		saveStatus:     saveStatus,
 		timeout:        timeout,
 		requester:      requesterFn,
@@ -167,16 +195,20 @@ func init() {
 		h += "  meg [path|pathsFile] [hostsFile] [outputDir]\n\n"
 
 		h += "Options:\n"
-		h += "  -b, --body <val>           Set the request body\n"
-		h += "  -c, --concurrency <val>    Set the concurrency level (default: 20)\n"
-		h += "  -d, --delay <millis>       Milliseconds between requests to the same host (default: 5000)\n"
-		h += "  -H, --header <header>      Send a custom HTTP header\n"
-		h += "  -L, --location             Follow redirects / location header\n"
-		h += "  -r, --rawhttp              Use the rawhttp library for requests (experimental)\n"
-		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
-		h += "  -t, --timeout <millis>     Set the HTTP timeout (default: 10000)\n"
-		h += "  -v, --verbose              Verbose mode\n"
-		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
+		h += "  -b,  --body <val>           Set the request body\n"
+		h += "  -c,  --concurrency <val>    Set the concurrency level (default: 20)\n"
+		h += "  -d,  --delay <millis>       Milliseconds between requests to the same host (default: 5000)\n"
+		h += "  -dr, --discresp <string>    Discard responses containing specific string\n"
+		h += "  -H,  --header <header>      Send a custom HTTP header\n"
+		h += "  -L,  --location             Follow redirects / location header\n"
+		h += "  -r,  --rawhttp              Use the rawhttp library for requests (experimental)\n"
+		h += "  -ri, --regexignore <string> Ignore results where the body matches a regex pattern\n\n"
+		h += "  -rk, --regexkeep <string>   Keep results where the body matches a regex pattern\n\n"
+		h += "  -sr, --saveresp <string>    Save only responses containing specific string\n"
+		h += "  -s,  --savestatus <status>  Save only responses with specific status code\n"
+		h += "  -t,  --timeout <millis>     Set the HTTP timeout (default: 10000)\n"
+		h += "  -v,  --verbose              Verbose mode\n"
+		h += "  -X,  --method <method>      HTTP method (default: GET)\n\n"
 
 		h += "Defaults:\n"
 		h += "  pathsFile: ./paths\n"
