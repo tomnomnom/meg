@@ -54,6 +54,7 @@ type config struct {
 	paths     string
 	hosts     string
 	output    string
+	proxyStr  string
 	noHeaders bool
 
 	requester requester
@@ -110,6 +111,10 @@ func processArgs() config {
 	noHeaders := false
 	flag.BoolVar(&noHeaders, "no-headers", false, "")
 
+	var proxyStr string
+	flag.StringVar(&proxyStr, "proxy", "", "")
+	flag.StringVar(&proxyStr, "p", "", "")
+
 	// verbose param
 	verbose := false
 	flag.BoolVar(&verbose, "verbose", false, "")
@@ -154,6 +159,7 @@ func processArgs() config {
 		verbose:        verbose,
 		paths:          paths,
 		hosts:          hosts,
+		proxyStr:       proxyStr,
 		output:         output,
 		noHeaders:      noHeaders,
 	}
@@ -175,6 +181,7 @@ func init() {
 		h += "  -r, --rawhttp              Use the rawhttp library for requests (experimental)\n"
 		h += "  -s, --savestatus <status>  Save only responses with specific status code\n"
 		h += "  -t, --timeout <millis>     Set the HTTP timeout (default: 10000)\n"
+		h += "  -p, --proxy <proxyurl>     Set a proxy URL to be used (rawhttp not supported)\n"
 		h += "  -v, --verbose              Verbose mode\n"
 		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
 

@@ -59,6 +59,13 @@ func main() {
 	// set up a rate limiter
 	rl := newRateLimiter(time.Duration(c.delay * 1000000))
 
+	// initialize the HTTP client with the
+	// config in case a proxy URL is supplied
+	if err := initClient(&c); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to initialize HTTP client: %s\n", err)
+		os.Exit(1)
+	}
+
 	// the request and response channels for
 	// the worker pool
 	requests := make(chan request)
