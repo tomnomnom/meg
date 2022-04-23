@@ -7,22 +7,39 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
 
-var transport = &http.Transport{
-	TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
-	DisableKeepAlives: true,
-	DialContext: (&net.Dialer{
-		Timeout:   30 * time.Second,
-		KeepAlive: time.Second,
-		DualStack: true,
-	}).DialContext,
-}
+var httpClient *http.Client
 
-var httpClient = &http.Client{
-	Transport: transport,
+func initClient(c *config) error {
+	var transport = &http.Transport{
+		TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
+		DisableKeepAlives: true,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: time.Second,
+			DualStack: true,
+		}).DialContext,
+	}
+
+	// If the proxy string is not empty
+	// we will try to parse it.
+	if c.proxyStr != "" {
+		proxyURL, err := url.Parse(c.proxyStr)
+		if err != nil {
+			return fmt.Errorf("Failed parsing proxy URL %s: %q", c.proxyStr, err)
+		}
+		// then set the Proxy field of the transport
+		// struct to the parsed URL
+		transport.Proxy = http.ProxyURL(proxyURL)
+	}
+	httpClient = &http.Client{
+		Transport: transport,
+	}
+	return nil
 }
 
 func goRequest(r request) response {
