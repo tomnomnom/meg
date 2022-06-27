@@ -142,6 +142,7 @@ Options:
   -s, --savestatus <status>  Save only responses with specific status code
   -v, --verbose              Verbose mode
   -X, --method <method>      HTTP method (default: GET)
+  -g, --savegf <gf entry>    Save only if gf finds something
 
 Defaults:
   pathsFile: ./paths
