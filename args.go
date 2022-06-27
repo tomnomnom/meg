@@ -41,6 +41,8 @@ func (s saveStatusArgs) Includes(search int) bool {
 }
 
 type config struct {
+	trackerLink    string
+	saveHeader     string
 	body           string
 	concurrency    int
 	delay          int
@@ -60,6 +62,10 @@ type config struct {
 }
 
 func processArgs() config {
+
+	// tracker link params
+	trackerLink := ""
+	flag.StringVar(&trackerLink, "tracker", "", "")
 
 	// body param
 	body := ""
@@ -95,6 +101,11 @@ func processArgs() config {
 	var saveStatus saveStatusArgs
 	flag.Var(&saveStatus, "savestatus", "")
 	flag.Var(&saveStatus, "s", "")
+
+	// saveheader parms
+	saveHeader := ""
+	flag.StringVar(&saveHeader, "saveheader", "", "")
+	flag.StringVar(&saveHeader, "sh", "", "")
 
 	// timeout param
 	timeout := 10000
@@ -142,6 +153,8 @@ func processArgs() config {
 	}
 
 	return config{
+		trackerLink:    trackerLink,
+		saveHeader:     saveHeader,
 		body:           body,
 		concurrency:    concurrency,
 		delay:          delay,
@@ -177,6 +190,8 @@ func init() {
 		h += "  -t, --timeout <millis>     Set the HTTP timeout (default: 10000)\n"
 		h += "  -v, --verbose              Verbose mode\n"
 		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
+		h += "  -tracker <tracker link>    Replaces {tracker} in paths with the specified tracker link\n"
+		h += "  -sh --saveheader <header>  Save only responses containing a specific header\n"
 
 		h += "Defaults:\n"
 		h += "  pathsFile: ./paths\n"
