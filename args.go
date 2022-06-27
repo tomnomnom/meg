@@ -164,7 +164,7 @@ func init() {
 		h := "Request many paths for many hosts\n\n"
 
 		h += "Usage:\n"
-		h += "  meg [path|pathsFile] [hostsFile] [outputDir]\n\n"
+		h += "  meg [options] [path|pathsFile] [host|hostsFile] [outputDir]\n\n"
 
 		h += "Options:\n"
 		h += "  -b, --body <val>           Set the request body\n"
@@ -195,6 +195,8 @@ func init() {
 
 		h += "Examples:\n"
 		h += "  meg /robots.txt\n"
+		h += "  meg -s 200 -X HEAD\n"
+		h += "  meg -c 30 /\n"
 		h += "  meg paths.txt hosts.txt output\n"
 
 		fmt.Fprintf(os.Stderr, h)
