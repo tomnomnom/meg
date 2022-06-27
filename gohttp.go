@@ -52,6 +52,12 @@ func goRequest(r request) response {
 		r.headers = append(r.headers, fmt.Sprintf("Host: %s", r.Hostname()))
 	}
 
+	// let the request use user given host header
+	hostHeader := r.GetHeader("Host")
+	if hostHeader != "" {
+		req.Host = hostHeader
+	}
+
 	if !r.HasHeader("User-Agent") {
 		r.headers = append(r.headers, fmt.Sprintf("User-Agent: %s", userAgent))
 	}
