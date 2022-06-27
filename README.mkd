@@ -16,6 +16,11 @@ or later installed and configured you can install meg with `go install`:
 ```
 ▶ go install github.com/tomnomnom/meg@latest
 ```
+For Go 1.7 or higher:
+
+```
+▶ go instal github.com/tomnomnom/meg@latest
+```
 
 Or [download a binary](https://github.com/tomnomnom/meg/releases) and
 put it somewhere in your `$PATH` (e.g. in `/usr/bin/`).
