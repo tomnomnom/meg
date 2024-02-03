@@ -34,8 +34,21 @@ type *url.URL has no field or method Hostname)
  CertPool
 ```
 
-You should either update your version of Go, or use a binary release
-for your platform.
+If you find that your current version of Go is outdated and you need to update it, the process will vary based on your operating system.
+
+For Linux users, you can update Go by running the following command in your terminal:
+
+`sudo rm -rf /usr/local/go && wget https://golang.org/dl/go1.18.1.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.18.1.linux-amd64.tar.gz`
+
+Make sure to replace `go1.18.1.linux-amd64.tar.gz` with the version number of the latest Go release.
+
+For Windows users, you'll need to download the latest binaries from the official Go website. Here's how:
+
+1. Visit https://golang.org/dl/ to find the latest version of Go for Windows.
+2. Download the .msi file suitable for your system (either 32-bit or 64-bit).
+3. Run the downloaded file and follow the installation prompts to update Go on your system.
+
+After updating, you can verify the installation by opening a new terminal session and running `go version` to see the updated version number.
 
 ## Basic Usage
 
